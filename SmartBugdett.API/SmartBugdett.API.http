@@ -1,0 +1,6 @@
+@SmartBugdett.API_HostAddress = http://localhost:5003
+
+GET {{SmartBugdett.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
