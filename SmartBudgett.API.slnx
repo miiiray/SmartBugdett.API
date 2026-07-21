@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="SmartBudgett.Business/SmartBudgett.Business.csproj" />
+  <Project Path="SmartBudgett.DataAccess/SmartBudgett.DataAccess.csproj" />
+  <Project Path="SmartBudgett.Entities/SmartBudgett.Entities.csproj" />
+  <Project Path="SmartBugdett.API/SmartBudgett.API.csproj" />
+</Solution>

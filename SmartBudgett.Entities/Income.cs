@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace SmartBudgett.Entities
 {
-    public class Expense : BaseEntitiy
+    public class Income : BaseEntitiy
     {
         public decimal Amount { get; set; }
         public required string Description { get; set; }
-        public DateTime ExpenseDate { get; set; }
+        public DateTime IncomeDate { get; set; }
         public int CategoryId { get; set; }
         public int UserId { get; set; }
+
     }
 }
