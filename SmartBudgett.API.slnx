@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="SmartBudgett.Business/SmartBudgett.Business.csproj" />
+  <Project Path="SmartBudgett.Core/SmartBudgett.Core.csproj" Id="7715e6e6-1621-49c1-baf7-abf9c3c4208e" />
   <Project Path="SmartBudgett.DataAccess/SmartBudgett.DataAccess.csproj" />
   <Project Path="SmartBudgett.DTO/SmartBudgett.DTO.csproj" />
   <Project Path="SmartBudgett.Entities/SmartBudgett.Entities.csproj" />

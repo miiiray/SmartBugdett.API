@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SmartBudgett.DTO.Auth
 {
-    public class TokenOptions
+    internal class AccessToken
     {
     }
 }

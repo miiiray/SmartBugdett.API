@@ -1,8 +1,8 @@
-﻿using SmartBudgett.Business.Abstract;
-using SmartBudgett.Entities;
+﻿using SmartBudgett.Entities;
 using SmartBudgett.DataAccess.Abstract;
+using SmartBudgett.Business.Abstract.Services;
 
-namespace SmartBudgett.Business.Concrete
+namespace SmartBudgett.Business.Concrete.Managers
 {
     public class IncomeManager : IIncomeService
     {

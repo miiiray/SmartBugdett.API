@@ -7,7 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SmartBudgett.Business.Abstract;
+using SmartBudgett.Business.Abstract.Services;
 using SmartBudgett.Business.Concrete;
+using SmartBudgett.Business.Concrete.Managers;
+using SmartBudgett.Core.Security.Concrete;
 using SmartBudgett.DataAccess.Abstract;
 using SmartBudgett.DataAccess.Concrete;
 using SmartBudgett.DataAccess.Context;
@@ -126,4 +129,3 @@ app.MapControllers();
 
 app.Run();
 
-app.Run();

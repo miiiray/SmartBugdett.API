@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartBudgett.API.Common;
-using SmartBudgett.Business.Abstract;
+using SmartBudgett.Business.Abstract.Services;
 using SmartBudgett.Entities;
 
 namespace SmartBudgett.API.Controllers

@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SmartBudgett.Business\SmartBudgett.Business.csproj" />
+    <ProjectReference Include="..\SmartBudgett.Core\SmartBudgett.Core.csproj" />
     <ProjectReference Include="..\SmartBudgett.DataAccess\SmartBudgett.DataAccess.csproj" />
     <ProjectReference Include="..\SmartBudgett.DTO\SmartBudgett.DTO.csproj" />
     <ProjectReference Include="..\SmartBudgett.Entities\SmartBudgett.Entities.csproj" />

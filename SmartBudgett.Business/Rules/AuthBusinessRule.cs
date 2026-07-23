@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmartBudgett.DTO.Auth
+namespace SmartBudgett.Business.Rules
 {
-    public class TokenOptions
+    internal class AuthBusinessRule
     {
     }
 }

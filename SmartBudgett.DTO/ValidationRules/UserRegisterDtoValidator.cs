@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SmartBudgett.DTO.ValidationRules
 {
-    internal class UserRegisterDtoValidator
+    public class UserRegisterDtoValidator
     {
     }
 }

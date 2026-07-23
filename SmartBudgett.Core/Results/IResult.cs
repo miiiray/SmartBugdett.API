@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmartBudgett.DTO.Auth
+namespace SmartBudgett.Core.Results
 {
-    public class TokenOptions
+    public interface IResult
     {
+        bool Success { get; }
+        string Message { get; }
     }
 }

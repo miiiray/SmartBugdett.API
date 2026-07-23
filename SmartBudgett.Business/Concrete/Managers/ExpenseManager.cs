@@ -1,8 +1,8 @@
-﻿using SmartBudgett.Business.Abstract;
+﻿using SmartBudgett.Business.Abstract.Services;
 using SmartBudgett.DataAccess.Abstract;
 using SmartBudgett.Entities;
 
-namespace SmartBudgett.Business.Concrete
+namespace SmartBudgett.Business.Concrete.Managers
 {
     public class ExpenseManager : IExpenseService
     {

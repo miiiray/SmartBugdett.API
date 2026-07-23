@@ -1,6 +1,6 @@
 using SmartBudgett.Entities;
 
-namespace SmartBudgett.Business.Abstract
+namespace SmartBudgett.Business.Abstract.Services
 {
     public interface IUserService
     {

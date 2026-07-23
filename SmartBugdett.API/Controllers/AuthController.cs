@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using SmartBudgett.API.Common;
 using SmartBudgett.Business.Abstract;
+using SmartBudgett.Business.Abstract.Services;
 using SmartBudgett.DTO.Auth;
 using SmartBudgett.Entities;
 
@@ -63,7 +64,7 @@ namespace SmartBudgett.API.Controllers
             {
                 var users = await _userService.GetAllAsync();
 
-                if (users == null || !users.Any())
+                if (users == null || string.IsNullOrEmpty(users.FirstOrDefault()?.Email))
                 {
                     return BadRequest(ApiResponse<object>.Error("Giriş başarısız", "Veri tabanından hiçbir kullanıcı verisi çekilemedi."));
                 }

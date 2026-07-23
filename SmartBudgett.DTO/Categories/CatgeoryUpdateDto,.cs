@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmartBudgett.DTO.Auth
+namespace SmartBudgett.DTO.Categories
 {
-    public class TokenOptions
+    internal class CatgeoryUpdateDto_
     {
     }
 }
