@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmartBudgett.DTO
+namespace SmartBudgett.DTO.Categories
 {
-    public  class CategoryCreateDto
+    public class CategoryCreateDto
     {
         public string Name { get; set; }
+        public int UserId { get; set; }
     }
 }

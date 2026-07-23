@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
-using AutoMapper;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartBudgett.API.Common;
 using SmartBudgett.Business.Abstract;
-using SmartBudgett.DTO;
+using SmartBudgett.DTO.Incomes;
 using SmartBudgett.Entities;
-
 
 namespace SmartBudgett.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class IncomeController : ControllerBase
     {
         private readonly IIncomeService _incomeService;
@@ -22,65 +23,103 @@ namespace SmartBudgett.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<ActionResult<ApiResponse<List<IncomeResponseDto>>>> GetAll()
         {
-            var values = _incomeService.GetAll();
-            var response = _mapper.Map<List<IncomeResponseDto>>(values);
-            return Ok(response);
+            try
+            {
+                var values = await _incomeService.GetAllAsync();
+                var response = _mapper.Map<List<IncomeResponseDto>>(values);
+                return Ok(ApiResponse<List<IncomeResponseDto>>.Ok(response, "Gelirler başarıyla alınldı"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<List<IncomeResponseDto>>.Error("Gelirler alınırken hata oluştu", ex.Message));
+            }
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<ActionResult<ApiResponse<IncomeResponseDto>>> GetById(int id)
         {
-            var value = _incomeService.GetById(id);
-            if (value == null)
+            try
             {
-                return NotFound("Gelir bulunamadı");
-            }
+                var value = await _incomeService.GetByIdAsync(id);
+                if (value == null)
+                {
+                    return NotFound(ApiResponse<IncomeResponseDto>.Error("Gelir bulunamadı", $"ID: {id} olan gelir bulunamadı"));
+                }
 
-            var response = _mapper.Map<IncomeResponseDto>(value);
-            return Ok(response);
+                var response = _mapper.Map<IncomeResponseDto>(value);
+                return Ok(ApiResponse<IncomeResponseDto>.Ok(response, "Gelir başarıyla alınldı"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<IncomeResponseDto>.Error("Gelir alınırken hata oluştu", ex.Message));
+            }
         }
 
         [HttpPost]
-        public IActionResult Add(IncomeCreateDto incomeCreateDto)
+        public async Task<ActionResult<ApiResponse<IncomeResponseDto>>> Add(IncomeCreateDto incomeCreateDto)
         {
-            var income = _mapper.Map<Income>(incomeCreateDto);
-            _incomeService.Add(income);
-            return Ok("Gelir başarıyla eklendi");
+            try
+            {
+                var income = _mapper.Map<Income>(incomeCreateDto);
+                await _incomeService.AddAsync(income);
+                var result = _mapper.Map<IncomeResponseDto>(income);
+                return CreatedAtAction(nameof(GetById), new { id = income.Id }, 
+                    ApiResponse<IncomeResponseDto>.Ok(result, "Gelir başarıyla eklendi"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<IncomeResponseDto>.Error("Gelir eklenirken hata oluştu", ex.Message));
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, IncomeUpdateDto incomeUpdateDto)
+        public async Task<ActionResult<ApiResponse<IncomeResponseDto>>> Update(int id, IncomeUpdateDto incomeUpdateDto)
         {
-            if (id != incomeUpdateDto.Id)
+            try
             {
-                return BadRequest("Id uyuşmuyor");
-            }
+                if (id != incomeUpdateDto.Id)
+                {
+                    return BadRequest(ApiResponse<IncomeResponseDto>.Error("ID uyuşmuyor", "Route'daki ID ile DTO'daki ID uyuşmıyor"));
+                }
 
-            var existingIncome = _incomeService.GetById(id);
-            if (existingIncome == null)
+                var existingIncome = await _incomeService.GetByIdAsync(id);
+                if (existingIncome == null)
+                {
+                    return NotFound(ApiResponse<IncomeResponseDto>.Error("Gelir bulunamadı", $"ID: {id} olan gelir bulunamadı"));
+                }
+
+                _mapper.Map(incomeUpdateDto, existingIncome);
+                await _incomeService.UpdateAsync(existingIncome);
+                var result = _mapper.Map<IncomeResponseDto>(existingIncome);
+
+                return Ok(ApiResponse<IncomeResponseDto>.Ok(result, "Gelir başarıyla güncellendi"));
+            }
+            catch (Exception ex)
             {
-                return NotFound("Gelir bulunamadı");
+                return BadRequest(ApiResponse<IncomeResponseDto>.Error("Gelir güncellenirken hata oluştu", ex.Message));
             }
-
-            // DTO'daki yeni bilgileri var olan Entity üzerine eşliyoruz
-            _mapper.Map(incomeUpdateDto, existingIncome);
-            _incomeService.Update(existingIncome);
-
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
-            var income = _incomeService.GetById(id);
-            if (income == null)
+            try
             {
-                return NotFound("Gelir bulunamadı");
+                var income = await _incomeService.GetByIdAsync(id);
+                if (income == null)
+                {
+                    return NotFound(ApiResponse.Error("Gelir bulunamadı", $"ID: {id} olan gelir bulunamadı"));
+                }
+
+                await _incomeService.DeleteAsync(income);
+                return Ok(ApiResponse.Ok("Gelir başarıyla silindi"));
             }
-            _incomeService.Delete(income);
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse.Error("Gelir silinirken hata oluştu", ex.Message));
+            }
         }
     }
 }

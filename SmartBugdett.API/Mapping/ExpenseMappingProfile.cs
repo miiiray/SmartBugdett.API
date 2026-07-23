@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SmartBudgett.DTO;
+using SmartBudgett.DTO.Expenses;
 using SmartBudgett.Entities; 
 
 namespace SmartBudgett.API.Profiles

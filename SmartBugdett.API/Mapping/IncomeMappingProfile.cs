@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SmartBudgett.DTO;
+using SmartBudgett.DTO.Incomes;
 using SmartBudgett.Entities;
 
 namespace SmartBudgett.API.Mapping

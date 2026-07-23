@@ -6,14 +6,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using SmartBudgett.API.Middlewares;
-using SmartBudgett.API.Profiles;
 using SmartBudgett.Business.Abstract;
 using SmartBudgett.Business.Concrete;
 using SmartBudgett.DataAccess.Abstract;
 using SmartBudgett.DataAccess.Concrete;
 using SmartBudgett.DataAccess.Context;
-using SmartBudgett.DTO;
 using SmartBudgett.DTO.ValidationRules;
 
 
@@ -41,12 +38,26 @@ builder.Services.AddScoped<IIncomeRepository, IncomeRepository>();
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+// Unit of Work Pattern
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 // Services (Business)
 builder.Services.AddScoped<IUserService, UserManager>();
 builder.Services.AddScoped<ICategoryService, CategoryManager>();
 builder.Services.AddScoped<IIncomeService, IncomeManager>();
 builder.Services.AddScoped<IExpenseService, ExpenseManager>();
 builder.Services.AddScoped<ITokenHelper, JwtHelper>();
+
+// CORS Configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -64,14 +75,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Swagger Yapılandırması (Bearer Token Desteği İle)
+// Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "SmartBudgett API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "SmartBudgett API", Version = "v1", Description = "Budget Management API with async operations" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Örnek: 'Bearer 12345abcdef'",
+        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer 12345abcdef'",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -101,14 +112,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Middleware order: CORS > HTTPS > Authentication > Authorization > Controller
+//app.UseMiddleware<ExceptionMiddleware>();
+
 app.UseHttpsRedirection();
 
-// Middleware Sıralaması (Önce Authentication, Sonra Authorization)
+app.UseCors("AllowAll");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseMiddleware<ExceptionMiddleware>();
-
 app.MapControllers();
+
+app.Run();
 
 app.Run();

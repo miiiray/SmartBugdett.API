@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
-using SmartBudgett.DTO; 
+using SmartBudgett.DTO;
+using SmartBudgett.DTO.Categories;
 namespace SmartBudgett.DTO.ValidationRules
 {
     public class CategoryCreateDtoValidator : AbstractValidator<CategoryCreateDto>

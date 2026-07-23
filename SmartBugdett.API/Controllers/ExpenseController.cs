@@ -1,86 +1,125 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartBudgett.API.Common;
 using SmartBudgett.Business.Abstract;
-using SmartBudgett.DTO;
+using SmartBudgett.DTO.Expenses;
 using SmartBudgett.Entities;
 
 namespace SmartBudgett.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ExpenseController : ControllerBase
     {
         private readonly IExpenseService _expenseService;
-        private readonly IMapper _mapper; 
+        private readonly IMapper _mapper;
 
         public ExpenseController(IExpenseService expenseService, IMapper mapper)
         {
             _expenseService = expenseService;
-            _mapper = mapper; 
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<ActionResult<ApiResponse<List<ExpenseResponseDto>>>> GetAll()
         {
-            var values = _expenseService.GetAll();
-            
-            var responseValues = _mapper.Map<List<ExpenseResponseDto>>(values);
-
-            return Ok(responseValues);
+            try
+            {
+                var values = await _expenseService.GetAllAsync();
+                var responseValues = _mapper.Map<List<ExpenseResponseDto>>(values);
+                return Ok(ApiResponse<List<ExpenseResponseDto>>.Ok(responseValues, "Giderler başarıyla alındı"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<List<ExpenseResponseDto>>.Error("Giderler alınırken hata oluştu", ex.Message));
+            }
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<ActionResult<ApiResponse<ExpenseResponseDto>>> GetById(int id)
         {
-            var value = _expenseService.GetById(id);
-            if (value == null)
+            try
             {
-                return NotFound();
-            }
-        
-            var responseValue = _mapper.Map<ExpenseResponseDto>(value);
+                var value = await _expenseService.GetByIdAsync(id);
+                if (value == null)
+                {
+                    return NotFound(ApiResponse<ExpenseResponseDto>.Error("Gider bulunamadı", $"ID: {id} olan gider bulunamadı"));
+                }
 
-            return Ok(responseValue);
+                var responseValue = _mapper.Map<ExpenseResponseDto>(value);
+                return Ok(ApiResponse<ExpenseResponseDto>.Ok(responseValue, "Gider başarıyla alındı"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<ExpenseResponseDto>.Error("Gider alınırken hata oluştu", ex.Message));
+            }
         }
 
         [HttpPost]
-        public IActionResult Add(ExpenseCreateDto expenseDto)
+        public async Task<ActionResult<ApiResponse<ExpenseResponseDto>>> Add(ExpenseCreateDto expenseDto)
         {
-          
-            var expense = _mapper.Map<Expense>(expenseDto);
-
-            _expenseService.Add(expense);
-            return Ok("Gider başarıyla eklendi");
+            try
+            {
+                var expense = _mapper.Map<Expense>(expenseDto);
+                await _expenseService.AddAsync(expense);
+                var result = _mapper.Map<ExpenseResponseDto>(expense);
+                return CreatedAtAction(nameof(GetById), new { id = expense.Id },
+                    ApiResponse<ExpenseResponseDto>.Ok(result, "Gider başarıyla eklendi"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<ExpenseResponseDto>.Error("Gider eklenirken hata oluştu", ex.Message));
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, ExpenseCreateDto expenseDto) 
+        public async Task<ActionResult<ApiResponse<ExpenseResponseDto>>> Update(int id, ExpenseUpdateDto expenseDto)
         {
-            var existingExpense = _expenseService.GetById(id);
-            if (existingExpense == null)
+            try
             {
-                return NotFound("Gider bulunamadı");
+                if (id != expenseDto.Id)
+                {
+                    return BadRequest(ApiResponse<ExpenseResponseDto>.Error("ID uyuşmuyor", "Route'daki ID ile DTO'daki ID uyuşmıyor"));
+                }
+
+                var existingExpense = await _expenseService.GetByIdAsync(id);
+                if (existingExpense == null)
+                {
+                    return NotFound(ApiResponse<ExpenseResponseDto>.Error("Gider bulunamadı", $"ID: {id} olan gider bulunamadı"));
+                }
+
+                _mapper.Map(expenseDto, existingExpense);
+                await _expenseService.UpdateAsync(existingExpense);
+                var result = _mapper.Map<ExpenseResponseDto>(existingExpense);
+
+                return Ok(ApiResponse<ExpenseResponseDto>.Ok(result, "Gider başarıyla güncellendi"));
             }
-
-       
-            _mapper.Map(expenseDto, existingExpense);
-
-            _expenseService.Update(existingExpense);
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<ExpenseResponseDto>.Error("Gider güncellenirken hata oluştu", ex.Message));
+            }
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
-            var existingExpense = _expenseService.GetById(id);
-            if (existingExpense == null)
+            try
             {
-                return NotFound("Gider bulunamadı");
-            }
+                var existingExpense = await _expenseService.GetByIdAsync(id);
+                if (existingExpense == null)
+                {
+                    return NotFound(ApiResponse.Error("Gider bulunamadı", $"ID: {id} olan gider bulunamadı"));
+                }
 
-            _expenseService.Delete(existingExpense);
-            return NoContent();
+                await _expenseService.DeleteAsync(existingExpense);
+                return Ok(ApiResponse.Ok("Gider başarıyla silindi"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse.Error("Gider silinirken hata oluştu", ex.Message));
+            }
         }
     }
 }

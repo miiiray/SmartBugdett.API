@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmartBudgett.DTO
+namespace SmartBudgett.DTO.Auth
 {
     internal class TokenOptions
     {

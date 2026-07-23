@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SmartBudgett.Entities
 {
-    public class Category : BaseEntitiy
+    public class Category : BaseEntity
     {
         public required string Name { get; set; }
         public int UserId { get; set; }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SmartBudgett.Entities
 {
-    public class Expense : BaseEntitiy
+    public class Expense : BaseEntity
     {
         public decimal Amount { get; set; }
         public required string Description { get; set; }

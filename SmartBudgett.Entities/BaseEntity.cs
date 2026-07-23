@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SmartBudgett.Entities
 {
-    public abstract class BaseEntitiy
+    public abstract class BaseEntity
     {
         public int Id { get; set; }
         public DateTime CreatedDate { get; set; }

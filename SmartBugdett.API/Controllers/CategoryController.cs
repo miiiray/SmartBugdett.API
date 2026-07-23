@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartBudgett.API.Common;
 using SmartBudgett.Business.Abstract;
-using SmartBudgett.DTO;
 using SmartBudgett.DTO.Categories;
 using SmartBudgett.Entities;
 
@@ -11,12 +10,12 @@ namespace SmartBudgett.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
-        private readonly IMapper _mapper; 
+        private readonly IMapper _mapper;
 
-        
         public CategoryController(ICategoryService categoryService, IMapper mapper)
         {
             _categoryService = categoryService;
@@ -24,72 +23,98 @@ namespace SmartBudgett.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<ActionResult<ApiResponse<List<CategoryResponseDto>>>> GetAll()
         {
-            var values = _categoryService.GetAll();
-
-            // 3. Sözdizimi hatası düzeltildi: List<CategoryResponseDto> olarak eşliyoruz
-            var response = _mapper.Map<List<CategoryResponseDto>>(values);
-
-            return Ok(response);
+            try
+            {
+                var values = await _categoryService.GetAllAsync();
+                var response = _mapper.Map<List<CategoryResponseDto>>(values);
+                return Ok(ApiResponse<List<CategoryResponseDto>>.Ok(response, "Kategoriler başarıyla alındı"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<List<CategoryResponseDto>>.Error("Kategoriler alınırken hata oluştu", ex.Message));
+            }
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<ActionResult<ApiResponse<CategoryResponseDto>>> GetById(int id)
         {
-            var value = _categoryService.GetById(id);
-            if (value == null)
+            try
             {
-                return NotFound("Kategori bulunamadı.");
-            }
+                var value = await _categoryService.GetByIdAsync(id);
+                if (value == null)
+                {
+                    return NotFound(ApiResponse<CategoryResponseDto>.Error("Kategori bulunamadı", $"ID: {id} olan kategori bulunamadı"));
+                }
 
-            // Dilersen tekil nesneyi de DTO'ya dönüştürüp dönebilirsin:
-            var response = _mapper.Map<CategoryResponseDto>(value);
-            return Ok(response);
+                var response = _mapper.Map<CategoryResponseDto>(value);
+                return Ok(ApiResponse<CategoryResponseDto>.Ok(response, "Kategori başarıyla alındı"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<CategoryResponseDto>.Error("Kategori alınırken hata oluştu", ex.Message));
+            }
         }
 
         [HttpPost]
-        public IActionResult Add(CategoryCreateDto categoryCreateDto)
+        public async Task<ActionResult<ApiResponse<CategoryResponseDto>>> Add(CategoryCreateDto categoryCreateDto)
         {
-            // DTO -> Entity dönüşümü
-            var category = _mapper.Map<Category>(categoryCreateDto);
-
-            _categoryService.Add(category);
-            return Ok("Kategori başarıyla eklendi.");
+            try
+            {
+                var category = _mapper.Map<Category>(categoryCreateDto);
+                await _categoryService.AddAsync(category);
+                var result = _mapper.Map<CategoryResponseDto>(category);
+                return CreatedAtAction(nameof(GetById), new { id = category.Id },
+                    ApiResponse<CategoryResponseDto>.Ok(result, "Kategori başarıyla eklendi"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<CategoryResponseDto>.Error("Kategori eklenirken hata oluştu", ex.Message));
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, CategoryResponseDto categoryResponseDto)
+        public async Task<ActionResult<ApiResponse<CategoryResponseDto>>> Update(int id, CategoryCreateDto categoryCreateDto)
         {
-            if (id != categoryResponseDto.Id)
+            try
             {
-                return BadRequest("ID uyuşmuyor.");
-            }
+                var existingCategory = await _categoryService.GetByIdAsync(id);
+                if (existingCategory == null)
+                {
+                    return NotFound(ApiResponse<CategoryResponseDto>.Error("Kategori bulunamadı", $"ID: {id} olan kategori bulunamadı"));
+                }
 
-            var existingCategory = _categoryService.GetById(id);
-            if (existingCategory == null)
+                _mapper.Map(categoryCreateDto, existingCategory);
+                await _categoryService.UpdateAsync(existingCategory);
+                var result = _mapper.Map<CategoryResponseDto>(existingCategory);
+
+                return Ok(ApiResponse<CategoryResponseDto>.Ok(result, "Kategori başarıyla güncellendi"));
+            }
+            catch (Exception ex)
             {
-                return NotFound("Kategori bulunamadı.");
+                return BadRequest(ApiResponse<CategoryResponseDto>.Error("Kategori güncellenirken hata oluştu", ex.Message));
             }
-
-            // DTO'daki yeni bilgileri var olan Entity üzerine eşliyoruz
-            _mapper.Map(categoryResponseDto, existingCategory);
-
-            _categoryService.Update(existingCategory);
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
-            var category = _categoryService.GetById(id);
-            if (category == null)
+            try
             {
-                return NotFound("Kategori bulunamadı.");
-            }
+                var category = await _categoryService.GetByIdAsync(id);
+                if (category == null)
+                {
+                    return NotFound(ApiResponse.Error("Kategori bulunamadı", $"ID: {id} olan kategori bulunamadı"));
+                }
 
-            _categoryService.Delete(category);
-            return NoContent();
+                await _categoryService.DeleteAsync(category);
+                return Ok(ApiResponse.Ok("Kategori başarıyla silindi"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse.Error("Kategori silinirken hata oluştu", ex.Message));
+            }
         }
     }
 }
