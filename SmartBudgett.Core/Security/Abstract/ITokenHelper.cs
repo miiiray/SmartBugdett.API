@@ -7,3 +7,4 @@ namespace SmartBudgett.Core.Security.Abstract
         string CreateToken(User user);
     }
 }
+          

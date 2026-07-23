@@ -6,7 +6,7 @@ using SmartBudgett.Business.Abstract;
 using SmartBudgett.Business.Abstract.Services;
 using SmartBudgett.DTO.Auth;
 using SmartBudgett.Entities;
-
+using SmartBudgett.Core.Security.Abstract;
 namespace SmartBudgett.API.Controllers
 {
     [Route("api/[controller]")]

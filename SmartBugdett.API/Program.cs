@@ -1,16 +1,14 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using SmartBudgett.Core.Security.Abstract;
+using SmartBudgett.Core.Security.Concrete;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using SmartBudgett.Business.Abstract;
 using SmartBudgett.Business.Abstract.Services;
-using SmartBudgett.Business.Concrete;
 using SmartBudgett.Business.Concrete.Managers;
-using SmartBudgett.Core.Security.Concrete;
 using SmartBudgett.DataAccess.Abstract;
 using SmartBudgett.DataAccess.Concrete;
 using SmartBudgett.DataAccess.Context;
@@ -49,7 +47,7 @@ builder.Services.AddScoped<IUserService, UserManager>();
 builder.Services.AddScoped<ICategoryService, CategoryManager>();
 builder.Services.AddScoped<IIncomeService, IncomeManager>();
 builder.Services.AddScoped<IExpenseService, ExpenseManager>();
-builder.Services.AddScoped<ITokenHelper, JwtHelper>();
+IServiceCollection serviceCollection = builder.Services.AddScoped<ITokenHelper, JwtHelper>();
 
 // CORS Configuration
 builder.Services.AddCors(options =>
