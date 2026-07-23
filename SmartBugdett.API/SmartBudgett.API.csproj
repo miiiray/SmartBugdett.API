@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.2.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
@@ -20,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SmartBudgett.Business\SmartBudgett.Business.csproj" />
     <ProjectReference Include="..\SmartBudgett.DataAccess\SmartBudgett.DataAccess.csproj" />
+    <ProjectReference Include="..\SmartBudgett.DTO\SmartBudgett.DTO.csproj" />
     <ProjectReference Include="..\SmartBudgett.Entities\SmartBudgett.Entities.csproj" />
   </ItemGroup>
 

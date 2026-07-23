@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmartBudgett.Business.Abstract;
+using SmartBudgett.DTO;
 using SmartBudgett.Entities;
 
 namespace SmartBudgett.API.Controllers
@@ -10,15 +12,22 @@ namespace SmartBudgett.API.Controllers
     public class ExpenseController : ControllerBase
     {
         private readonly IExpenseService _expenseService;
-        public ExpenseController(IExpenseService expenseService)
+        private readonly IMapper _mapper; 
+
+        public ExpenseController(IExpenseService expenseService, IMapper mapper)
         {
-            _expenseService = expenseService;        }
+            _expenseService = expenseService;
+            _mapper = mapper; 
+        }
 
         [HttpGet]
         public IActionResult GetAll()
         {
             var values = _expenseService.GetAll();
-            return Ok(values);
+            
+            var responseValues = _mapper.Map<List<ExpenseResponseDto>>(values);
+
+            return Ok(responseValues);
         }
 
         [HttpGet("{id}")]
@@ -29,29 +38,35 @@ namespace SmartBudgett.API.Controllers
             {
                 return NotFound();
             }
-            return Ok(value);
+        
+            var responseValue = _mapper.Map<ExpenseResponseDto>(value);
+
+            return Ok(responseValue);
         }
 
         [HttpPost]
-        public IActionResult Add(Expense expense)
+        public IActionResult Add(ExpenseCreateDto expenseDto)
         {
+          
+            var expense = _mapper.Map<Expense>(expenseDto);
+
             _expenseService.Add(expense);
             return Ok("Gider başarıyla eklendi");
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Expense expense)
+        public IActionResult Update(int id, ExpenseCreateDto expenseDto) 
         {
-            if (id != expense.Id)
-            {
-                return BadRequest("ıd uyuşmuyor");
-            }
             var existingExpense = _expenseService.GetById(id);
             if (existingExpense == null)
             {
                 return NotFound("Gider bulunamadı");
             }
-            _expenseService.Update(expense);
+
+       
+            _mapper.Map(expenseDto, existingExpense);
+
+            _expenseService.Update(existingExpense);
             return NoContent();
         }
 
@@ -63,6 +78,7 @@ namespace SmartBudgett.API.Controllers
             {
                 return NotFound("Gider bulunamadı");
             }
+
             _expenseService.Delete(existingExpense);
             return NoContent();
         }

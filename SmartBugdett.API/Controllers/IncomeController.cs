@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Generic;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SmartBudgett.Business.Abstract;
+using SmartBudgett.DTO;
 using SmartBudgett.Entities;
+
 
 namespace SmartBudgett.API.Controllers
 {
@@ -10,17 +13,20 @@ namespace SmartBudgett.API.Controllers
     public class IncomeController : ControllerBase
     {
         private readonly IIncomeService _incomeService;
+        private readonly IMapper _mapper;
 
-        public IncomeController(IIncomeService incomeService)
+        public IncomeController(IIncomeService incomeService, IMapper mapper)
         {
             _incomeService = incomeService;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public IActionResult Getall()
+        public IActionResult GetAll()
         {
             var values = _incomeService.GetAll();
-            return Ok(values);
+            var response = _mapper.Map<List<IncomeResponseDto>>(values);
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
@@ -29,31 +35,42 @@ namespace SmartBudgett.API.Controllers
             var value = _incomeService.GetById(id);
             if (value == null)
             {
-                return NotFound("Gelir bulunmadı");
+                return NotFound("Gelir bulunamadı");
             }
-            return Ok(value);
+
+            var response = _mapper.Map<IncomeResponseDto>(value);
+            return Ok(response);
         }
+
         [HttpPost]
-        public IActionResult Add(Income income)
+        public IActionResult Add(IncomeCreateDto incomeCreateDto)
         {
+            var income = _mapper.Map<Income>(incomeCreateDto);
             _incomeService.Add(income);
             return Ok("Gelir başarıyla eklendi");
         }
-        [HttpPut ("{id}")]
-        public IActionResult Update(int id, Income income)
+
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, IncomeUpdateDto incomeUpdateDto)
         {
-            if (id != income.Id)
+            if (id != incomeUpdateDto.Id)
             {
                 return BadRequest("Id uyuşmuyor");
             }
+
             var existingIncome = _incomeService.GetById(id);
             if (existingIncome == null)
             {
                 return NotFound("Gelir bulunamadı");
             }
-            _incomeService.Update(income);
+
+            // DTO'daki yeni bilgileri var olan Entity üzerine eşliyoruz
+            _mapper.Map(incomeUpdateDto, existingIncome);
+            _incomeService.Update(existingIncome);
+
             return NoContent();
         }
+
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
@@ -66,4 +83,4 @@ namespace SmartBudgett.API.Controllers
             return NoContent();
         }
     }
-}   
+}

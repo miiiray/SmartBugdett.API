@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SmartBudgett.DataAccess.Context;
 
@@ -11,9 +12,11 @@ using SmartBudgett.DataAccess.Context;
 namespace SmartBudgett.DataAccess.Migrations
 {
     [DbContext(typeof(SmartBudgetContext))]
-    partial class SmartBudgetContextModelSnapshot : ModelSnapshot
+    [Migration("20260722140527_RemovePasswordHashColumn")]
+    partial class RemovePasswordHashColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
