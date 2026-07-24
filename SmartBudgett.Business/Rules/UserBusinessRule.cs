@@ -1,12 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SmartBudgett.Entities;
+using Volo.Abp;
 
 namespace SmartBudgett.Business.Rules
 {
-    internal class UserBusinessRule
+    public class UserBusinessRule
     {
+        // Kullanıcı adı/soyadı boş mu?
+        public void CheckIfUserInfoIsValid(string firstName, string lastName)
+        {
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
+            {
+                throw new BusinessException("Kullanıcı ad ve soyad bilgisi boş bırakılamaz.");
+            }
+        }
+
+        // Kullanıcı var mı?
+        public void CheckIfUserExists(User? user)
+        {
+            if (user == null)
+            {
+                throw new BusinessException("Kullanıcı bulunamadı.");
+            }
+        }
     }
 }
