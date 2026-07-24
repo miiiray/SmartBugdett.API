@@ -3,10 +3,9 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using SmartBudgett.API.Common;
 using SmartBudgett.Business.Abstract;
-using SmartBudgett.Business.Abstract.Services;
+using SmartBudgett.Core.Security.Abstract;
 using SmartBudgett.DTO.Auth;
 using SmartBudgett.Entities;
-using SmartBudgett.Core.Security.Abstract;
 namespace SmartBudgett.API.Controllers
 {
     [Route("api/[controller]")]

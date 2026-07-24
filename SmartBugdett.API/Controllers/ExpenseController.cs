@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartBudgett.API.Common;
+using SmartBudgett.Business.Abstract;
 using SmartBudgett.Business.Abstract.Services;
 using SmartBudgett.DTO.Expenses;
 using SmartBudgett.Entities;
@@ -22,19 +23,15 @@ namespace SmartBudgett.API.Controllers
             _mapper = mapper;
         }
 
+        
         [HttpGet]
         public async Task<ActionResult<ApiResponse<List<ExpenseResponseDto>>>> GetAll()
         {
-            try
-            {
-                var values = await _expenseService.GetAllAsync();
-                var responseValues = _mapper.Map<List<ExpenseResponseDto>>(values);
-                return Ok(ApiResponse<List<ExpenseResponseDto>>.Ok(responseValues, "Giderler başarıyla alındı"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<List<ExpenseResponseDto>>.Error("Giderler alınırken hata oluştu", ex.Message));
-            }
+            var values = await _expenseService.GetAllAsync();
+            var responseValues = _mapper.Map<List<ExpenseResponseDto>>(values);
+
+            return Ok(ApiResponse<List<ExpenseResponseDto>>
+                .Ok(responseValues, "Giderler başarıyla alındı"));
         }
 
         [HttpGet("{id}")]
@@ -57,21 +54,18 @@ namespace SmartBudgett.API.Controllers
             }
         }
 
+
         [HttpPost]
         public async Task<ActionResult<ApiResponse<ExpenseResponseDto>>> Add(ExpenseCreateDto expenseDto)
         {
-            try
-            {
-                var expense = _mapper.Map<Expense>(expenseDto);
-                await _expenseService.AddAsync(expense);
-                var result = _mapper.Map<ExpenseResponseDto>(expense);
-                return CreatedAtAction(nameof(GetById), new { id = expense.Id },
-                    ApiResponse<ExpenseResponseDto>.Ok(result, "Gider başarıyla eklendi"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<ExpenseResponseDto>.Error("Gider eklenirken hata oluştu", ex.Message));
-            }
+            var expense = _mapper.Map<Expense>(expenseDto);
+
+            await _expenseService.AddAsync(expense);
+
+            var result = _mapper.Map<ExpenseResponseDto>(expense);
+
+            return CreatedAtAction(nameof(GetById), new { id = expense.Id },
+                ApiResponse<ExpenseResponseDto>.Ok(result, "Gider başarıyla eklendi"));
         }
 
         [HttpPut("{id}")]

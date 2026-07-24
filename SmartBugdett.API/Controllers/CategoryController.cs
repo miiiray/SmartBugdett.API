@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartBudgett.API.Common;
-using SmartBudgett.Business.Abstract.Services;
+using SmartBudgett.Business.Abstract;
 using SmartBudgett.DTO.Categories;
 using SmartBudgett.Entities;
 

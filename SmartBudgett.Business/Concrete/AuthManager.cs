@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmartBudgett.Business.Concrete.Managers
+namespace SmartBudgett.Business.Concrete
 {
     internal class AuthManager
     {

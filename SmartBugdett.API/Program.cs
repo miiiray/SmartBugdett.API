@@ -7,12 +7,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using SmartBudgett.Business.Abstract.Services;
-using SmartBudgett.Business.Concrete.Managers;
 using SmartBudgett.DataAccess.Abstract;
 using SmartBudgett.DataAccess.Concrete;
 using SmartBudgett.DataAccess.Context;
 using SmartBudgett.DTO.ValidationRules;
+using SmartBudgett.Business.Abstract;
+using SmartBudgett.Business.Concrete;
+using SmartBudgett.Business.Abstract.Services;
+using SmartBudgett.Core.Middleware;
 
 
 
@@ -115,7 +117,7 @@ if (app.Environment.IsDevelopment())
 
 // Middleware order: CORS > HTTPS > Authentication > Authorization > Controller
 //app.UseMiddleware<ExceptionMiddleware>();
-
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
