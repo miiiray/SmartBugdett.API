@@ -11,6 +11,7 @@ namespace SmartBudgett.API.Mapping
         {
             // ReverseMap() sayesinde hem Category -> DTO hem de DTO -> Category çalışır!
             CreateMap<Category, CategoryResponseDto>().ReverseMap();
+            CreateMap<Category, CategoryUpdateDto>().ReverseMap();
             CreateMap<Category, CategoryCreateDto>().ReverseMap();
         }
     }

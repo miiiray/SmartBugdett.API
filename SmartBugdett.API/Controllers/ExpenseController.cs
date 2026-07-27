@@ -6,6 +6,7 @@ using SmartBudgett.Business.Abstract;
 using SmartBudgett.Business.Abstract.Services;
 using SmartBudgett.DTO.Expenses;
 using SmartBudgett.Entities;
+using System.Security.Claims;
 
 namespace SmartBudgett.API.Controllers
 {
@@ -15,105 +16,142 @@ namespace SmartBudgett.API.Controllers
     public class ExpenseController : ControllerBase
     {
         private readonly IExpenseService _expenseService;
+        private readonly ICategoryService _categoryService;
         private readonly IMapper _mapper;
 
-        public ExpenseController(IExpenseService expenseService, IMapper mapper)
+        public ExpenseController(IExpenseService expenseService,
+            ICategoryService categoryService,IMapper mapper)
         {
             _expenseService = expenseService;
+            _categoryService= categoryService;
             _mapper = mapper;
         }
 
         
+       
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<ExpenseResponseDto>>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var values = await _expenseService.GetAllAsync();
-            var responseValues = _mapper.Map<List<ExpenseResponseDto>>(values);
+            var userIdValue =
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            return Ok(ApiResponse<List<ExpenseResponseDto>>
-                .Ok(responseValues, "Giderler başarıyla alındı"));
+            if (!int.TryParse(userIdValue, out var userId))
+                return Unauthorized();
+
+            var expenses = await _expenseService.GetAllAsync();
+
+            var userExpenses = expenses
+                .Where(x => x.UserId == userId)
+                .ToList();
+
+            return Ok(
+                _mapper.Map<List<ExpenseResponseDto>>(userExpenses)
+            );
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<ExpenseResponseDto>>> GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var value = await _expenseService.GetByIdAsync(id);
-                if (value == null)
-                {
-                    return NotFound(ApiResponse<ExpenseResponseDto>.Error("Gider bulunamadı", $"ID: {id} olan gider bulunamadı"));
-                }
+            var userIdValue =
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                var responseValue = _mapper.Map<ExpenseResponseDto>(value);
-                return Ok(ApiResponse<ExpenseResponseDto>.Ok(responseValue, "Gider başarıyla alındı"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<ExpenseResponseDto>.Error("Gider alınırken hata oluştu", ex.Message));
-            }
+            if (!int.TryParse(userIdValue, out var userId))
+                return Unauthorized();
+
+            var expense = await _expenseService.GetByIdAsync(id);
+
+            if (expense == null)
+                return NotFound("Harcama bulunamadı.");
+
+            if (expense.UserId != userId)
+                return Forbid();
+
+            return Ok(_mapper.Map<ExpenseResponseDto>(expense));
         }
 
-
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<ExpenseResponseDto>>> Add(ExpenseCreateDto expenseDto)
+        public async Task<IActionResult> Create(ExpenseCreateDto dto)
         {
-            var expense = _mapper.Map<Expense>(expenseDto);
+            var userIdValue =
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(userIdValue, out var userId))
+                return Unauthorized();
+
+            var category =
+                await _categoryService.GetByIdAsync(dto.CategoryId);
+
+            if (category == null)
+                return BadRequest("Kategori bulunamadı.");
+
+            if (category.UserId != userId)
+                return Forbid();
+
+            var expense = _mapper.Map<Expense>(dto);
+
+            expense.UserId = userId;
 
             await _expenseService.AddAsync(expense);
 
-            var result = _mapper.Map<ExpenseResponseDto>(expense);
-
-            return CreatedAtAction(nameof(GetById), new { id = expense.Id },
-                ApiResponse<ExpenseResponseDto>.Ok(result, "Gider başarıyla eklendi"));
+            return Ok(_mapper.Map<ExpenseResponseDto>(expense));
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<ExpenseResponseDto>>> Update(int id, ExpenseUpdateDto expenseDto)
+        public async Task<IActionResult> Update(int id, ExpenseUpdateDto dto)
         {
-            try
-            {
-                if (id != expenseDto.Id)
-                {
-                    return BadRequest(ApiResponse<ExpenseResponseDto>.Error("ID uyuşmuyor", "Route'daki ID ile DTO'daki ID uyuşmıyor"));
-                }
+            var userIdValue =
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                var existingExpense = await _expenseService.GetByIdAsync(id);
-                if (existingExpense == null)
-                {
-                    return NotFound(ApiResponse<ExpenseResponseDto>.Error("Gider bulunamadı", $"ID: {id} olan gider bulunamadı"));
-                }
+            if (!int.TryParse(userIdValue, out var userId))
+                return Unauthorized();
 
-                _mapper.Map(expenseDto, existingExpense);
-                await _expenseService.UpdateAsync(existingExpense);
-                var result = _mapper.Map<ExpenseResponseDto>(existingExpense);
+            var expense = await _expenseService.GetByIdAsync(id);
 
-                return Ok(ApiResponse<ExpenseResponseDto>.Ok(result, "Gider başarıyla güncellendi"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<ExpenseResponseDto>.Error("Gider güncellenirken hata oluştu", ex.Message));
-            }
+            if (expense == null)
+                return NotFound("Harcama bulunamadı.");
+
+            if (expense.UserId != userId)
+                return Forbid();
+
+            var category =
+                await _categoryService.GetByIdAsync(dto.CategoryId);
+
+            if (category == null)
+                return BadRequest("Kategori bulunamadı.");
+
+            if (category.UserId != userId)
+                return Forbid();
+
+            expense.Amount = dto.Amount;
+            expense.Description = dto.Description;
+            expense.ExpenseDate = dto.ExpenseDate;
+            expense.CategoryId = dto.CategoryId;
+
+            await _expenseService.UpdateAsync(expense);
+
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ApiResponse>> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var existingExpense = await _expenseService.GetByIdAsync(id);
-                if (existingExpense == null)
-                {
-                    return NotFound(ApiResponse.Error("Gider bulunamadı", $"ID: {id} olan gider bulunamadı"));
-                }
+            var userIdValue =
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                await _expenseService.DeleteAsync(existingExpense);
-                return Ok(ApiResponse.Ok("Gider başarıyla silindi"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse.Error("Gider silinirken hata oluştu", ex.Message));
-            }
+            if (!int.TryParse(userIdValue, out var userId))
+                return Unauthorized();
+
+            var expense = await _expenseService.GetByIdAsync(id);
+
+            if (expense == null)
+                return NotFound("Harcama bulunamadı.");
+
+            if (expense.UserId != userId)
+                return Forbid();
+
+            await _expenseService.DeleteAsync(expense);
+
+            return NoContent();
         }
     }
 }

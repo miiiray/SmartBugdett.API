@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SmartBudgett.Core.Security.JWT
+namespace SmartBudgett.DTO.Auth
 {
-    internal class AccessToken
+    public class AccessToken
     {
+        public string Token { get; set; } = string.Empty;
+        public DateTime Expiration { get; set; }
     }
 }

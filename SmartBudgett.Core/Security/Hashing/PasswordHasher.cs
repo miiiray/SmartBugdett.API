@@ -1,12 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using BCrypt.Net;
 
 namespace SmartBudgett.Core.Security.Hashing
 {
-    internal class PasswordHasher
+    public static class PasswordHasher
     {
+        // Şifreyi şifrelenmiş (hashlenmiş) metne çevirir
+        public static string CreatePasswordHash(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
+        }
+
+        // Girilen şifre ile veritabanındaki hashlenmiş şifreyi karşılaştırır
+        public static bool VerifyPasswordHash(string password, string passwordHash)
+        {
+            return BCrypt.Net.BCrypt.Verify(password, passwordHash);
+        }
     }
 }

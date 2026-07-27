@@ -9,6 +9,6 @@ namespace SmartBudgett.DTO.Categories
     public class CategoryCreateDto
     {
         public string Name { get; set; }
-        public int UserId { get; set; }
+       
     }
 }

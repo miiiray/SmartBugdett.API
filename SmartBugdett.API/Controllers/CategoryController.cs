@@ -5,6 +5,7 @@ using SmartBudgett.API.Common;
 using SmartBudgett.Business.Abstract;
 using SmartBudgett.DTO.Categories;
 using SmartBudgett.Entities;
+using System.Security.Claims;
 
 namespace SmartBudgett.API.Controllers
 {
@@ -23,100 +24,101 @@ namespace SmartBudgett.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<CategoryResponseDto>>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                var values = await _categoryService.GetAllAsync();
-                var response = _mapper.Map<List<CategoryResponseDto>>(values);
-                return Ok(ApiResponse<List<CategoryResponseDto>>.Ok(response, "Kategoriler başarıyla alındı."));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<List<CategoryResponseDto>>.Error("Kategoriler alınırken hata oluştu.", ex.Message));
-            }
+            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(userIdValue, out var userId))
+                return Unauthorized();
+
+            var categories = await _categoryService.GetAllAsync();
+
+            var userCategories = categories
+                .Where(x => x.UserId == userId)
+                .ToList();
+
+            return Ok(_mapper.Map<List<CategoryResponseDto>>(userCategories));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<CategoryResponseDto>>> GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var value = await _categoryService.GetByIdAsync(id);
-                if (value == null)
-                {
-                    return NotFound(ApiResponse<CategoryResponseDto>.Error("Kategori bulunamadı.", $"ID: {id} olan kategori bulunamadı."));
-                }
+            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                var response = _mapper.Map<CategoryResponseDto>(value);
-                return Ok(ApiResponse<CategoryResponseDto>.Ok(response, "Kategori başarıyla alındı."));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<CategoryResponseDto>.Error("Kategori alınırken hata oluştu.", ex.Message));
-            }
+            if (!int.TryParse(userIdValue, out var userId))
+                return Unauthorized();
+
+            var category = await _categoryService.GetByIdAsync(id);
+
+            if (category == null)
+                return NotFound();
+
+            if (category.UserId != userId)
+                return Forbid();
+
+            return Ok(_mapper.Map<CategoryResponseDto>(category));
         }
 
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<CategoryResponseDto>>> Add([FromBody] CategoryCreateDto categoryCreateDto)
+        public async Task<IActionResult> Create(CategoryCreateDto dto)
         {
-            try
-            {
-                var category = _mapper.Map<Category>(categoryCreateDto);
-                await _categoryService.AddAsync(category);
-                var result = _mapper.Map<CategoryResponseDto>(category);
+            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                return CreatedAtAction(nameof(GetById), new { id = category.Id },
-                    ApiResponse<CategoryResponseDto>.Ok(result, "Kategori başarıyla eklendi."));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<CategoryResponseDto>.Error("Kategori eklenirken hata oluştu.", ex.Message));
-            }
+            if (!int.TryParse(userIdValue, out var userId))
+                return Unauthorized();
+
+            var category = _mapper.Map<Category>(dto);
+
+            category.UserId = userId;
+
+            await _categoryService.AddAsync(category);
+
+            return Ok(_mapper.Map<CategoryResponseDto>(category));
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<CategoryResponseDto>>> Update(int id, [FromBody] CategoryCreateDto categoryCreateDto)
+        public async Task<IActionResult> Update(int id, CategoryUpdateDto dto)
         {
-            try
-            {
-                var existingCategory = await _categoryService.GetByIdAsync(id);
-                if (existingCategory == null)
-                {
-                    return NotFound(ApiResponse<CategoryResponseDto>.Error("Kategori bulunamadı.", $"ID: {id} olan kategori bulunamadı."));
-                }
+            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                _mapper.Map(categoryCreateDto, existingCategory);
-                await _categoryService.UpdateAsync(existingCategory);
-                var result = _mapper.Map<CategoryResponseDto>(existingCategory);
+            if (!int.TryParse(userIdValue, out var userId))
+                return Unauthorized();
 
-                return Ok(ApiResponse<CategoryResponseDto>.Ok(result, "Kategori başarıyla güncellendi."));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<CategoryResponseDto>.Error("Kategori güncellenirken hata oluştu.", ex.Message));
-            }
+            var category = await _categoryService.GetByIdAsync(id);
+
+            if (category == null)
+                return NotFound();
+
+            if (category.UserId != userId)
+                return Forbid();
+
+            category.Name = dto.Name;
+
+            await _categoryService.UpdateAsync(category);
+
+            return NoContent();
         }
 
+        
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ApiResponse>> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var category = await _categoryService.GetByIdAsync(id);
-                if (category == null)
-                {
-                    return NotFound(ApiResponse.Error("Kategori bulunamadı.", $"ID: {id} olan kategori bulunamadı."));
-                }
+            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                await _categoryService.DeleteAsync(category);
-                return Ok(ApiResponse.Ok("Kategori başarıyla silindi."));
-            }
-            catch (Exception ex)
-            {
-                // İlişkili veri olduğunda veritabanından fırlatılacak hatayı yakalamak için
-                return BadRequest(ApiResponse.Error("Kategori silinirken hata oluştu.", "Bu kategoriye bağlı harcamalar veya gelirler olduğu için silinemiyor olabilir."));
-            }
+            if (!int.TryParse(userIdValue, out var userId))
+                return Unauthorized();
+
+            var category = await _categoryService.GetByIdAsync(id);
+
+            if (category == null)
+                return NotFound();
+
+            if (category.UserId != userId)
+                return Forbid();
+
+            await _categoryService.DeleteAsync(category);
+
+            return NoContent();
         }
     }
 }

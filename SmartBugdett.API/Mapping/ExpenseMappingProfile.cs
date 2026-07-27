@@ -2,14 +2,18 @@
 using SmartBudgett.DTO.Expenses;
 using SmartBudgett.Entities;
 
-public class ExpenseMappingProfile : Profile
+
+namespace SmartBudgett.API.Mapping
 {
-    public ExpenseMappingProfile()
+    public class ExpenseMappingProfile : Profile
     {
-        CreateMap<ExpenseCreateDto, Expense>();
+        public ExpenseMappingProfile()
+        {
+            CreateMap<ExpenseCreateDto, Expense>();
 
-        CreateMap<ExpenseUpdateDto, Expense>();
+            CreateMap<ExpenseUpdateDto, Expense>();
 
-        CreateMap<Expense, ExpenseResponseDto>();
+            CreateMap<Expense, ExpenseResponseDto>();
+        }
     }
 }

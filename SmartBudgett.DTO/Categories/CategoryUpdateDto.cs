@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace SmartBudgett.DTO.Categories
 {
-    internal class CatgeoryUpdateDto_
+    public class CategoryUpdateDto
     {
+        public string Name { get; set; }
     }
 }

@@ -3,25 +3,28 @@ using SmartBudgett.DTO.Expenses;
 
 namespace SmartBudgett.DTO.ValidationRules
 {
-    public class ExpenseCreateDtoValidator : AbstractValidator<ExpenseCreateDto>
+    public class ExpenseCreateDtoValidator
+     : AbstractValidator<ExpenseCreateDto>
     {
         public ExpenseCreateDtoValidator()
         {
-            RuleFor(x => x.Description)
-                .NotEmpty().WithMessage("Harcama açıklaması boş geçilemez.")
-                .MinimumLength(2).WithMessage("Harcama açıklaması en az 2 karakter olmalıdır.");
-
             RuleFor(x => x.Amount)
-                .GreaterThan(0).WithMessage("Harcama tutarı 0'dan büyük olmalıdır.");
+                .GreaterThan(0)
+                .WithMessage("Harcama miktarı sıfırdan büyük olmalıdır.");
+
+            RuleFor(x => x.Description)
+                .NotEmpty()
+                .WithMessage("Açıklama boş olamaz.")
+                .MaximumLength(250)
+                .WithMessage("Açıklama en fazla 250 karakter olabilir.");
 
             RuleFor(x => x.ExpenseDate)
-                .NotEmpty().WithMessage("Harcama tarihi seçilmelidir.");
+                .NotEmpty()
+                .WithMessage("Harcama tarihi boş olamaz.");
 
             RuleFor(x => x.CategoryId)
-                .GreaterThan(0).WithMessage("Geçerli bir kategori seçilmelidir.");
-
-            RuleFor(x => x.UserId)
-                .GreaterThan(0).WithMessage("Geçerli bir kullanıcı seçilmelidir.");
+                .GreaterThan(0)
+                .WithMessage("Geçerli bir kategori seçilmelidir.");
         }
     }
 }

@@ -1,24 +1,26 @@
 using System.Text;
-using SmartBudgett.Core.Security.Abstract;
-using SmartBudgett.Core.Security.Concrete;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SmartBudgett.Business.Abstract;
+using SmartBudgett.Business.Abstract.Services;
+using SmartBudgett.Business.Concrete;
+using SmartBudgett.Business.Concrete.Managers;
+using SmartBudgett.Business.Rules;
+using SmartBudgett.Core.Middleware;
+using SmartBudgett.Core.Security.Abstract;
+using SmartBudgett.Core.Security.Concrete;
 using SmartBudgett.DataAccess.Abstract;
 using SmartBudgett.DataAccess.Concrete;
 using SmartBudgett.DataAccess.Context;
+using SmartBudgett.API.Mapping;
 using SmartBudgett.DTO.ValidationRules;
-using SmartBudgett.Business.Abstract;
-using SmartBudgett.Business.Concrete;
-using SmartBudgett.Business.Abstract.Services;
-using SmartBudgett.Core.Middleware;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // DbContext
 builder.Services.AddDbContext<SmartBudgetContext>(options =>
@@ -31,7 +33,11 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<ExpenseCreateDtoValidator>();
 
 // AutoMapper
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(
+    cfg => { },
+    typeof(CategoryMappingProfile),
+    typeof(ExpenseMappingProfile),
+    typeof(IncomeMappingProfile));
 
 builder.Services.AddControllers();
 
@@ -49,7 +55,16 @@ builder.Services.AddScoped<IUserService, UserManager>();
 builder.Services.AddScoped<ICategoryService, CategoryManager>();
 builder.Services.AddScoped<IIncomeService, IncomeManager>();
 builder.Services.AddScoped<IExpenseService, ExpenseManager>();
-IServiceCollection serviceCollection = builder.Services.AddScoped<ITokenHelper, JwtHelper>();
+
+// Business Rules
+builder.Services.AddScoped<AuthBusinessRule>();
+builder.Services.AddScoped<CategoryBusinessRules>();
+builder.Services.AddScoped<ExpenceBusinessRules>();
+builder.Services.AddScoped<IncomeBusinessRules>();
+builder.Services.AddScoped<UserBusinessRule>();
+
+// Security & JWT
+builder.Services.AddScoped<ITokenHelper, JwtHelper>();
 
 // CORS Configuration
 builder.Services.AddCors(options =>
@@ -61,7 +76,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
-
+builder.Services.AddHttpClient<IAiService, AiManager>();
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -77,7 +92,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecurityKey"]))
         };
     });
-
+builder.Services.AddAuthorization();
 // Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -115,17 +130,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Middleware order: CORS > HTTPS > Authentication > Authorization > Controller
-//app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
-
 app.UseCors("AllowAll");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
-

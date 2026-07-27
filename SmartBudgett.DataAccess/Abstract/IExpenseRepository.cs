@@ -9,11 +9,6 @@ namespace SmartBudgett.DataAccess.Abstract
 {
     public interface IExpenseRepository : IGenericRepository<Expense>
     {
-        
-        List<Expense> GetAll();
-        Expense GetById(int id);
-        void Add(Expense expense);
-        void Update (Expense expense);
-        void delete(Expense expense);
+       
     }
 }
