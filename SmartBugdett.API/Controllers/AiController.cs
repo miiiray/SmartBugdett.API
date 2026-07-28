@@ -1,5 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SmartBudgett.Business.Abstract;
 using SmartBudgett.Business.Abstract.Services;
+using System.Security.Claims;
+
 
 namespace SmartBudgett.API.Controllers
 {
@@ -8,18 +13,29 @@ namespace SmartBudgett.API.Controllers
     public class AiController : ControllerBase
     {
         private readonly IAiService _aiService;
-
         public AiController(IAiService aiService)
         {
             _aiService = aiService;
         }
-
+       
+        [Authorize]
         [HttpGet("test")]
         public async Task<IActionResult> Test()
         {
-            var result = await _aiService.AnalyzeBudgetAsync(1);
+            var userIdText = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdText, out var userId))
+            {
+                return Unauthorized();
+            }
+
+   
+
+            var result = await _aiService.AnalyzeBudgetAsync(userId);
 
             return Ok(result);
+
+
         }
     }
 }

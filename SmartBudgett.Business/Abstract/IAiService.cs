@@ -3,5 +3,6 @@
     public interface IAiService
     {
         Task<string> AnalyzeBudgetAsync(int userId);
+       
     }
 }

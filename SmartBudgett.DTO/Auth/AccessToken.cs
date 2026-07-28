@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace SmartBudgett.DTO.Auth
 {
-    internal class AccessToken
+    public class AccessToken
     {
+        public string Token { get; set; } = string.Empty;
+        public DateTime Expiration { get; set; }
     }
 }

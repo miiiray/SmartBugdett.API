@@ -15,7 +15,7 @@ namespace SmartBudgett.DataAccess.Concrete
             _dbSet = _context.Set<T>();
         }
 
-        // Sync methods
+     
         public List<T> GetAll()
         {
             return _dbSet.ToList();
@@ -44,7 +44,7 @@ namespace SmartBudgett.DataAccess.Concrete
             _context.SaveChanges();
         }
 
-        // Async methods
+        
         public async Task<List<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();

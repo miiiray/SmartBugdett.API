@@ -92,6 +92,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecurityKey"]))
         };
     });
+
 builder.Services.AddAuthorization();
 // Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();

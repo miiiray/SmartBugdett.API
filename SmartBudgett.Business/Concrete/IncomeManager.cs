@@ -93,8 +93,7 @@ namespace SmartBudgett.Business.Concrete
             if (string.IsNullOrWhiteSpace(income.Description))
                 throw new ArgumentException("Income description cannot be empty.");
 
-            if (income.CategoryId <= 0)
-                throw new ArgumentException("Income category id must be greater than zero.");
+           
 
             if (income.UserId <= 0)
                 throw new ArgumentException("Income user id must be greater than zero.");

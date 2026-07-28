@@ -129,7 +129,12 @@ namespace SmartBudgett.API.Controllers
 
             await _expenseService.UpdateAsync(expense);
 
-            return NoContent();
+            var result = _mapper.Map<ExpenseResponseDto>(expense);
+
+            return Ok(
+                ApiResponse<ExpenseResponseDto>.Ok(
+                    result,
+                    "Gider başarıyla güncellendi"));
         }
 
         [HttpDelete("{id}")]

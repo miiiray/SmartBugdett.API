@@ -29,7 +29,7 @@ namespace SmartBudgett.DataAccess.Concrete
             _context.Expenses.Update(expense);
             _context.SaveChanges();
         }
-        public void delete(Expense expense)
+        public void Delete(Expense expense)
         {
             _context.Expenses.Remove(expense);
             _context.SaveChanges();

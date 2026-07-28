@@ -35,7 +35,7 @@ namespace SmartBudgett.API.Controllers
                     return BadRequest(ApiResponse.Error("Kayıt başarısız", $"'{userRegisterDto.Email}' adresiyle zaten kayıtlı bir kullanıcı var."));
                 }
 
-                // BCrypt ile şifreyi güvenli şekilde hash'le
+               
                 string passwordHash = BCrypt.Net.BCrypt.HashPassword(userRegisterDto.Password);
 
                 var newUser = new User
@@ -83,7 +83,7 @@ namespace SmartBudgett.API.Controllers
                     return BadRequest(ApiResponse<object>.Error("Giriş başarısız", "Veri tabanındaki kullanıcı kaydında şifre alanı boş."));
                 }
 
-                // BCrypt ile şifre doğrulaması
+
                 bool isPasswordValid = BCrypt.Net.BCrypt.Verify(inputPassword, user.Password);
 
                 if (!isPasswordValid)
@@ -91,7 +91,7 @@ namespace SmartBudgett.API.Controllers
                     return BadRequest(ApiResponse<object>.Error("Giriş başarısız", "E-posta veya şifre hatalı."));
                 }
 
-                // Token üretimi
+               
                 try
                 {
                     var token = _tokenHelper.CreateToken(user);

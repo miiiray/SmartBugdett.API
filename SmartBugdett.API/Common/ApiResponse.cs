@@ -1,8 +1,6 @@
 namespace SmartBudgett.API.Common
 {
-    /// <summary>
-    /// Standard API Response wrapper - tüm endpoint'lerin aynı format'ta response dönmesini sağlar
-    /// </summary>
+
     public class ApiResponse<T>
     {
         public bool Success { get; set; }
@@ -25,7 +23,7 @@ namespace SmartBudgett.API.Common
             Errors = errors;
         }
 
-        // Factory methods for common responses
+       
         public static ApiResponse<T> Ok(T data, string message = "Operation successful")
         {
             return new ApiResponse<T>(true, message, data);
@@ -47,9 +45,7 @@ namespace SmartBudgett.API.Common
         }
     }
 
-    /// <summary>
-    /// Non-generic version for operations that don't return data
-    /// </summary>
+
     public class ApiResponse
     {
         public bool Success { get; set; }
@@ -70,7 +66,7 @@ namespace SmartBudgett.API.Common
             Errors = errors;
         }
 
-        // Factory methods
+    
         public static ApiResponse Ok(string message = "Operation successful")
         {
             return new ApiResponse(true, message);

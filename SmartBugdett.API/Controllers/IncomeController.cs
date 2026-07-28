@@ -5,6 +5,7 @@ using SmartBudgett.API.Common;
 using SmartBudgett.Business.Abstract;
 using SmartBudgett.DTO.Incomes;
 using SmartBudgett.Entities;
+using System.Security.Claims;
 
 namespace SmartBudgett.API.Controllers
 {
@@ -58,19 +59,41 @@ namespace SmartBudgett.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<IncomeResponseDto>>> Add(IncomeCreateDto incomeCreateDto)
+        [HttpPost]
+        public async Task<ActionResult<ApiResponse<IncomeResponseDto>>> Add(
+    IncomeCreateDto incomeCreateDto)
         {
             try
             {
+                var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (!int.TryParse(userIdValue, out var userId))
+                {
+                    return Unauthorized();
+                }
+
                 var income = _mapper.Map<Income>(incomeCreateDto);
+
+                income.UserId = userId;
+                income.IncomeDate = DateTime.UtcNow;
+
                 await _incomeService.AddAsync(income);
+
                 var result = _mapper.Map<IncomeResponseDto>(income);
-                return CreatedAtAction(nameof(GetById), new { id = income.Id }, 
-                    ApiResponse<IncomeResponseDto>.Ok(result, "Gelir başarıyla eklendi"));
+
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = income.Id },
+                    ApiResponse<IncomeResponseDto>.Ok(
+                        result,
+                        "Gelir başarıyla eklendi"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<IncomeResponseDto>.Error("Gelir eklenirken hata oluştu", ex.Message));
+                return BadRequest(
+                    ApiResponse<IncomeResponseDto>.Error(
+                        "Gelir eklenirken hata oluştu",
+                        ex.Message));
             }
         }
 

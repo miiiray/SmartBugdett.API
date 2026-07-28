@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SmartBudgett.Entities; // Proje adındaki çift 't'ye göre güncellendi
+using SmartBudgett.Entities;
 
 namespace SmartBudgett.DataAccess.Context
 {
     public class SmartBudgetContext : DbContext
     {
-        // Constructor kısmındaki options ve base tanımlamalarının doğruluğundan emin oluyoruz
-        public SmartBudgetContext(DbContextOptions<SmartBudgetContext> options) : base(options)
+        public SmartBudgetContext(
+            DbContextOptions<SmartBudgetContext> options)
+            : base(options)
         {
         }
 
@@ -14,5 +15,13 @@ namespace SmartBudgett.DataAccess.Context
         public DbSet<Category> Categories { get; set; }
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<Income> Incomes { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfigurationsFromAssembly(
+                typeof(SmartBudgetContext).Assembly);
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }
