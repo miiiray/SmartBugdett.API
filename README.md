@@ -1,218 +1,136 @@
-\# SmartBudget API
+<div align="center">
 
+# 💰 SmartBudget API
 
+### Personal Budget Management System built with ASP.NET Core
 
-A layered ASP.NET Core Web API for personal budget management.
+![.NET](https://img.shields.io/badge/.NET-9-purple?style=for-the-badge)
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-Web%20API-blue?style=for-the-badge)
+![C#](https://img.shields.io/badge/C%23-Backend-239120?style=for-the-badge)
+![SQL Server](https://img.shields.io/badge/SQL%20Server-Database-red?style=for-the-badge)
+![OpenAI](https://img.shields.io/badge/OpenAI-AI-green?style=for-the-badge)
 
+</div>
 
+---
 
-\## Overview
+# 📖 About
 
+SmartBudget API is a layered ASP.NET Core Web API designed for managing personal finances.
 
+The project enables users to securely manage:
 
-SmartBudget API is designed to help users manage their personal finances by tracking incomes, expenses, and categories. The project follows Clean Layered Architecture principles and focuses on maintainability, scalability, and secure authentication.
+- 💵 Incomes
+- 💸 Expenses
+- 📂 Categories
+- 🤖 AI Budget Analysis
 
+---
 
+# ✨ Features
 
-\## Features
+✅ JWT Authentication
 
+✅ User Authorization
 
+✅ Expense Management
 
-\- JWT Authentication \& Authorization
+✅ Income Management
 
-\- User Management
+✅ Category Management
 
-\- Expense Management
+✅ AI Budget Analysis
 
-\- Income Management
+✅ FluentValidation
 
-\- Category Management
+✅ AutoMapper
 
-\- AI-powered Budget Analysis
+✅ Generic Repository
 
-\- FluentValidation
+✅ Unit of Work
 
-\- AutoMapper
+✅ Swagger Documentation
 
-\- Generic Repository
+---
 
-\- Unit of Work
+# 🏗️ Project Architecture
 
-\- Entity Framework Core
+```text
+📦 SmartBudget.API
+ ┣ 📂 Controllers
+ ┣ 📂 Mapping
 
-\- SQL Server Integration
+📦 SmartBudget.Business
+ ┣ 📂 Managers
+ ┣ 📂 ValidationRules
 
-\- Swagger API Documentation
+📦 SmartBudget.DataAccess
+ ┣ 📂 Context
+ ┣ 📂 Configurations
+ ┣ 📂 Repositories
+ ┣ 📂 UnitOfWork
 
+📦 SmartBudget.DTO
 
+📦 SmartBudget.Entities
 
-\## Architecture
-
-
-
+📦 SmartBudget.Core
 ```
 
-SmartBudget.API
+---
 
-│
+# ⚙️ Tech Stack
 
-├── Controllers
+| Technology | Purpose |
+|------------|----------|
+| ASP.NET Core | Web API |
+| C# | Backend |
+| Entity Framework Core | ORM |
+| SQL Server | Database |
+| JWT | Authentication |
+| AutoMapper | Object Mapping |
+| FluentValidation | Validation |
+| OpenAI API | AI Budget Analysis |
+| Swagger | API Documentation |
 
-├── Middleware
+---
 
-│
+# 🔐 Security
 
-SmartBudget.Business
+- 🔑 JWT Bearer Authentication
+- 👤 User-based Authorization
+- 🔒 Password Hashing
+- 🛡️ Ownership Validation
 
-│
+---
 
-├── Managers
+# 🤖 AI Integration
 
-├── Services
+The project includes an AI-powered budget analysis service.
 
-├── ValidationRules
+It analyzes users' income and expense data and generates personalized financial recommendations using the OpenAI API.
 
-│
+---
 
-SmartBudget.DataAccess
+# 🚀 Future Improvements
 
-│
+- 📊 Dashboard
+- 📈 Budget Reports
+- 🎯 Savings Goals
+- 🔔 Notifications
+- 📄 PDF Export
+- 📑 Excel Export
 
-├── Context
+---
 
-├── Repositories
+# 📌 Status
 
-├── Configurations
+🟢 Active Development
 
-├── UnitOfWork
+---
 
-│
+<div align="center">
 
-SmartBudget.DTO
+### ⭐ If you like this project, don't forget to leave a star.
 
-│
-
-├── Auth
-
-├── Users
-
-├── Expenses
-
-├── Categories
-
-├── Incomes
-
-│
-
-SmartBudget.Entities
-
-│
-
-├── User
-
-├── Expense
-
-├── Income
-
-├── Category
-
-│
-
-SmartBudget.Core
-
-```
-
-
-
-\## Technologies
-
-
-
-\- ASP.NET Core
-
-\- C#
-
-\- Entity Framework Core
-
-\- SQL Server
-
-\- JWT Authentication
-
-\- AutoMapper
-
-\- FluentValidation
-
-\- OpenAI API
-
-\- Swagger
-
-
-
-\## Security
-
-
-
-\- JWT Bearer Authentication
-
-\- User-based authorization
-
-\- Ownership validation
-
-\- Password hashing
-
-\- Secure API endpoints
-
-
-
-\## AI Features
-
-
-
-The application includes an AI-powered budget analysis service that analyzes user income and expense data and generates personalized financial recommendations using the OpenAI API.
-
-
-
-\## Future Improvements
-
-
-
-\- Monthly budget reports
-
-\- Savings goals
-
-\- Dashboard \& Analytics
-
-\- Notifications
-
-\- Export to PDF \& Excel
-
-\- Spending forecasts
-
-
-
-\## Getting Started
-
-
-
-```bash
-
-git clone <repository-url>
-
-
-
-cd SmartBudget.API
-
-```
-
-
-
-Install dependencies and configure your SQL Server connection string before running the project.
-
-
-
-\## Author
-
-
-
-Developed as a layered ASP.NET Core backend project for learning modern backend architecture and AI integration.
-
+</div>
