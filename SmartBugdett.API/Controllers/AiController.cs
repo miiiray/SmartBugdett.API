@@ -28,9 +28,6 @@ namespace SmartBudgett.API.Controllers
             {
                 return Unauthorized();
             }
-
-   
-
             var result = await _aiService.AnalyzeBudgetAsync(userId);
 
             return Ok(result);

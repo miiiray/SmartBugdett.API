@@ -12,11 +12,7 @@ namespace SmartBudgett.DTO.ValidationRules
                 .MinimumLength(2).WithMessage("Gelir açıklaması en az 2 karakter olmalıdır.");
 
             RuleFor(x => x.Amount)
-                .GreaterThan(0).WithMessage("Gelir tutarı 0'dan büyük olmalıdır.");
-
-          
-
-           
+                .GreaterThan(0).WithMessage("Gelir tutarı 0'dan büyük olmalıdır."); 
         }
     }
 }
