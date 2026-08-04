@@ -14,7 +14,7 @@ namespace SmartBudgett.Business.Concrete
         }
 
         // Sync methods
-        public Income GetById(int id)
+        public Income? GetById(int id)
         {
             if (id <= 0)
                 throw new ArgumentException("Income id must be greater than zero.");
@@ -26,11 +26,6 @@ namespace SmartBudgett.Business.Concrete
         {
             ValidateIncome(income);
             _incomeRepository.Add(income);
-        }
-
-        public List<Income> GetAll()
-        {
-            return _incomeRepository.GetAll();
         }
 
         public void Update(Income income)
@@ -48,7 +43,7 @@ namespace SmartBudgett.Business.Concrete
         }
 
         // Async methods
-        public async Task<Income> GetByIdAsync(int id)
+        public async Task<Income?> GetByIdAsync(int id)
         {
             if (id <= 0)
                 throw new ArgumentException("Income id must be greater than zero.");
@@ -62,9 +57,12 @@ namespace SmartBudgett.Business.Concrete
             await _incomeRepository.AddAsync(income);
         }
 
-        public async Task<List<Income>> GetAllAsync()
+        public Task<List<Income>> GetByUserIdAsync(int userId)
         {
-            return await _incomeRepository.GetAllAsync();
+            if (userId <= 0)
+                throw new ArgumentException("User id must be greater than zero.");
+
+            return _incomeRepository.GetByUserIdAsync(userId);
         }
 
         public async Task UpdateAsync(Income income)
@@ -93,7 +91,8 @@ namespace SmartBudgett.Business.Concrete
             if (string.IsNullOrWhiteSpace(income.Description))
                 throw new ArgumentException("Income description cannot be empty.");
 
-           
+            if (income.CategoryId <= 0)
+                throw new ArgumentException("Income category id must be greater than zero.");
 
             if (income.UserId <= 0)
                 throw new ArgumentException("Income user id must be greater than zero.");

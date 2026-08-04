@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartBudgett.API.Common;
+using SmartBudgett.API.Extensions;
 using SmartBudgett.Business.Abstract;
+using SmartBudgett.DTO.Users;
 using SmartBudgett.Entities;
 
 namespace SmartBudgett.API.Controllers
@@ -18,85 +20,81 @@ namespace SmartBudgett.API.Controllers
             _userService = userService;
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<User>>> GetById(int id)
+        [HttpGet("me")]
+        public async Task<ActionResult<ApiResponse<UserResponseDto>>> GetCurrentUser()
         {
-            try
-            {
-                var value = await _userService.GetByIdAsync(id);
+            if (!User.TryGetUserId(out var userId))
+                return Unauthorized();
 
-                if (value == null)
-                {
-                    return NotFound(ApiResponse<User>.Error("Kullanıcı bulunamadı", $"ID: {id} olan kullanıcı bulunamadı"));
-                }
+            var user = await _userService.GetByIdAsync(userId);
 
-                return Ok(ApiResponse<User>.Ok(value, "Kullanıcı başarıyla alındı"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<User>.Error("Kullanıcı alırken hata oluştu", ex.Message));
-            }
+            if (user is null)
+                return NotFound(ApiResponse<UserResponseDto>.Error("Kullanıcı bulunamadı"));
+
+            return Ok(ApiResponse<UserResponseDto>.Ok(
+                ToResponseDto(user),
+                "Kullanıcı başarıyla alındı"));
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<User>>> Update(int id, User user)
+        [HttpPut("me")]
+        public async Task<ActionResult<ApiResponse<UserResponseDto>>> UpdateCurrentUser(UserUpdateDto dto)
         {
-            try
+            if (!User.TryGetUserId(out var userId))
+                return Unauthorized();
+
+            var user = await _userService.GetByIdAsync(userId);
+
+            if (user is null)
+                return NotFound(ApiResponse<UserResponseDto>.Error("Kullanıcı bulunamadı"));
+
+            var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
+            var emailOwner = await _userService.GetByEmailAsync(normalizedEmail);
+
+            if (emailOwner is not null && emailOwner.Id != userId)
             {
-                if (id != user.Id)
-                {
-                    return BadRequest(ApiResponse<User>.Error("ID uyuşmuyor", "Route'daki ID ile DTO'daki ID uyuşmıyor"));
-                }
-
-                var existingUser = await _userService.GetByIdAsync(id);
-
-                if (existingUser == null)
-                {
-                    return NotFound(ApiResponse<User>.Error("Kullanıcı bulunamadı", $"ID: {id} olan kullanıcı bulunamadı"));
-                }
-
-                await _userService.UpdateAsync(user);
-                return Ok(ApiResponse<User>.Ok(user, "Kullanıcı başarıyla güncellendi"));
+                return Conflict(ApiResponse<UserResponseDto>.Error(
+                    "Güncelleme başarısız",
+                    "Bu e-posta adresi başka bir kullanıcı tarafından kullanılıyor."));
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<User>.Error("Kullanıcı güncellenirken hata oluştu", ex.Message));
-            }
+
+            user.FirstName = dto.FirstName.Trim();
+            user.LastName = dto.LastName.Trim();
+            user.Email = normalizedEmail;
+            user.UpdatedDate = DateTime.UtcNow;
+
+            await _userService.UpdateAsync(user);
+
+            return Ok(ApiResponse<UserResponseDto>.Ok(
+                ToResponseDto(user),
+                "Kullanıcı başarıyla güncellendi"));
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<ApiResponse>> Delete(int id)
+        [HttpDelete("me")]
+        public async Task<ActionResult<ApiResponse>> DeleteCurrentUser()
         {
-            try
-            {
-                var user = await _userService.GetByIdAsync(id);
+            if (!User.TryGetUserId(out var userId))
+                return Unauthorized();
 
-                if (user == null)
-                {
-                    return NotFound(ApiResponse.Error("Kullanıcı bulunamadı", $"ID: {id} olan kullanıcı bulunamadı"));
-                }
+            var user = await _userService.GetByIdAsync(userId);
 
-                await _userService.DeleteAsync(user);
-                return Ok(ApiResponse.Ok("Kullanıcı başarıyla silindi"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse.Error("Kullanıcı silinirken hata oluştu", ex.Message));
-            }
+            if (user is null)
+                return NotFound(ApiResponse.Error("Kullanıcı bulunamadı"));
+
+            await _userService.DeleteAsync(user);
+            return Ok(ApiResponse.Ok("Kullanıcı başarıyla silindi"));
         }
 
-        [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<User>>>> GetAll()
+        private static UserResponseDto ToResponseDto(User user)
         {
-            try
+            return new UserResponseDto
             {
-                var values = await _userService.GetAllAsync();
-                return Ok(ApiResponse<List<User>>.Ok(values, "Kullanıcılar başarıyla alındı"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<List<User>>.Error("Kullanıcılar alınırken hata oluştu", ex.Message));
-            }
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                CreatedDate = user.CreatedDate,
+                UpdatedDate = user.UpdatedDate
+            };
         }
     }
 }

@@ -15,8 +15,8 @@ namespace SmartBudgett.DTO.ValidationRules
             RuleFor(x => x.Description)
                 .NotEmpty()
                 .WithMessage("Açıklama boş olamaz.")
-                .MaximumLength(250)
-                .WithMessage("Açıklama en fazla 250 karakter olabilir.");
+                .MaximumLength(500)
+                .WithMessage("Açıklama en fazla 500 karakter olabilir.");
 
             RuleFor(x => x.ExpenseDate)
                 .NotEmpty()

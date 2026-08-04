@@ -4,5 +4,6 @@
   <Project Path="SmartBudgett.DataAccess/SmartBudgett.DataAccess.csproj" />
   <Project Path="SmartBudgett.DTO/SmartBudgett.DTO.csproj" />
   <Project Path="SmartBudgett.Entities/SmartBudgett.Entities.csproj" />
+  <Project Path="SmartBudgett.Tests/SmartBudgett.Tests.csproj" />
   <Project Path="SmartBugdett.API/SmartBudgett.API.csproj" />
 </Solution>

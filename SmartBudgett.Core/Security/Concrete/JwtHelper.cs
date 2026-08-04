@@ -21,7 +21,17 @@ namespace SmartBudgett.Core.Security.Concrete
         public string CreateToken(User user)
         {
             var jwtSettings = _configuration.GetSection("Jwt");
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecurityKey"]));
+            var securityKey = jwtSettings["SecurityKey"];
+
+            if (string.IsNullOrWhiteSpace(securityKey))
+                throw new InvalidOperationException("JWT security key is not configured.");
+
+            var expirationMinutes = int.TryParse(
+                jwtSettings["AccessTokenExpirationMinutes"],
+                out var configuredExpirationMinutes)
+                ? configuredExpirationMinutes
+                : 120;
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -35,7 +45,7 @@ namespace SmartBudgett.Core.Security.Concrete
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(2),
+                expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
                 signingCredentials: creds
             );
 

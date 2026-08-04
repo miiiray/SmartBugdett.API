@@ -19,12 +19,7 @@ namespace SmartBudgett.Business.Concrete
             _userRepository.Add(user);
         }
 
-        public List<User> GetAll()
-        {
-            return _userRepository.GetAll();
-        }
-
-        public User GetById(int id)
+        public User? GetById(int id)
         {
             return _userRepository.GetById(id);
         }
@@ -49,14 +44,15 @@ namespace SmartBudgett.Business.Concrete
             await _userRepository.AddAsync(user);
         }
 
-        public async Task<List<User>> GetAllAsync()
-        {
-            return await _userRepository.GetAllAsync();
-        }
-
-        public async Task<User> GetByIdAsync(int id)
+        public async Task<User?> GetByIdAsync(int id)
         {
             return await _userRepository.GetByIdAsync(id);
+        }
+
+        public Task<User?> GetByEmailAsync(string email)
+        {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+            return _userRepository.GetByEmailAsync(normalizedEmail);
         }
 
         public async Task UpdateAsync(User user)

@@ -27,6 +27,20 @@ namespace SmartBudgett.DataAccess.Configurations
 
             builder.Property(i => i.UserId)
                    .IsRequired();
+
+            builder.HasIndex(i => new { i.UserId, i.IncomeDate });
+
+            builder.HasIndex(i => i.CategoryId);
+
+            builder.HasOne<User>()
+                   .WithMany()
+                   .HasForeignKey(i => i.UserId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne<Category>()
+                   .WithMany()
+                   .HasForeignKey(i => i.CategoryId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

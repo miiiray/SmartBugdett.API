@@ -4,15 +4,14 @@ namespace SmartBudgett.Business.Abstract.Services
 {
     public interface IExpenseService
     {
-        List<Expense> GetAll();
-        Expense GetById(int id);
+        Expense? GetById(int id);
         void Add(Expense expense);
         void Update(Expense expense);
         void Delete(Expense expense);
 
  
-        Task<List<Expense>> GetAllAsync();
-        Task<Expense> GetByIdAsync(int id);
+        Task<List<Expense>> GetByUserIdAsync(int userId);
+        Task<Expense?> GetByIdAsync(int id);
         Task AddAsync(Expense expense);
         Task UpdateAsync(Expense expense);
         Task DeleteAsync(Expense expense);

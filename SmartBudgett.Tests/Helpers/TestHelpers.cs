@@ -19,11 +19,14 @@ namespace SmartBudgett.Tests.Helpers
         }
 
         /// <summary>
-        /// Setup income repository mock for GetAllAsync
+        /// Setup income repository mock for a user-scoped query
         /// </summary>
-        public static void SetupIncomeGetAll(Mock<IIncomeRepository> mock, List<Income> incomes)
+        public static void SetupIncomeGetByUserId(
+            Mock<IIncomeRepository> mock,
+            int userId,
+            List<Income> incomes)
         {
-            mock.Setup(r => r.GetAllAsync())
+            mock.Setup(r => r.GetByUserIdAsync(userId))
                 .ReturnsAsync(incomes);
         }
 
@@ -66,11 +69,14 @@ namespace SmartBudgett.Tests.Helpers
         }
 
         /// <summary>
-        /// Setup expense repository mock for GetAllAsync
+        /// Setup expense repository mock for a user-scoped query
         /// </summary>
-        public static void SetupExpenseGetAll(Mock<IExpenseRepository> mock, List<Expense> expenses)
+        public static void SetupExpenseGetByUserId(
+            Mock<IExpenseRepository> mock,
+            int userId,
+            List<Expense> expenses)
         {
-            mock.Setup(r => r.GetAllAsync())
+            mock.Setup(r => r.GetByUserIdAsync(userId))
                 .ReturnsAsync(expenses);
         }
 
@@ -113,11 +119,14 @@ namespace SmartBudgett.Tests.Helpers
         }
 
         /// <summary>
-        /// Setup category repository mock for GetAllAsync
+        /// Setup category repository mock for a user-scoped query
         /// </summary>
-        public static void SetupCategoryGetAll(Mock<ICategoryRepository> mock, List<Category> categories)
+        public static void SetupCategoryGetByUserId(
+            Mock<ICategoryRepository> mock,
+            int userId,
+            List<Category> categories)
         {
-            mock.Setup(r => r.GetAllAsync())
+            mock.Setup(r => r.GetByUserIdAsync(userId))
                 .ReturnsAsync(categories);
         }
 
@@ -139,15 +148,6 @@ namespace SmartBudgett.Tests.Helpers
         {
             mock.Setup(r => r.GetByIdAsync(user.Id))
                 .ReturnsAsync(user);
-        }
-
-        /// <summary>
-        /// Setup user repository mock for GetAllAsync
-        /// </summary>
-        public static void SetupUserGetAll(Mock<IUserRepository> mock, List<User> users)
-        {
-            mock.Setup(r => r.GetAllAsync())
-                .ReturnsAsync(users);
         }
 
         // ==================== VERIFICATION HELPERS ====================

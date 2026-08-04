@@ -9,6 +9,6 @@ namespace SmartBudgett.DataAccess.Abstract
 {
     public interface IExpenseRepository : IGenericRepository<Expense>
     {
-       
+        Task<List<Expense>> GetByUserIdAsync(int userId);
     }
 }

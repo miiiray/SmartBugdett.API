@@ -88,6 +88,18 @@ namespace SmartBudgett.Tests.Business
             );
         }
 
+        [Fact]
+        public async Task AddAsync_WithInvalidCategoryId_ShouldThrowException()
+        {
+            var income = new IncomeBuilder()
+                .WithCategoryId(0)
+                .Build();
+
+            await Assert.ThrowsAsync<ArgumentException>(
+                async () => await _fixture.IncomeService.AddAsync(income)
+            );
+        }
+
         // ==================== GET BY ID TESTS ====================
 
         [Fact]
@@ -118,31 +130,31 @@ namespace SmartBudgett.Tests.Business
             );
         }
 
-        // ==================== GET ALL TESTS ====================
+        // ==================== GET BY USER TESTS ====================
 
         [Fact]
-        public async Task GetAllAsync_ShouldReturnAllIncomes()
+        public async Task GetByUserIdAsync_ShouldReturnOnlyUsersIncomes()
         {
             // Arrange
             var incomes = new IncomeBuilder()
                 .BuildList(5);  // 5 gelir oluştur
-            MockHelpers.SetupIncomeGetAll(_fixture.IncomeRepositoryMock, incomes);
+            MockHelpers.SetupIncomeGetByUserId(_fixture.IncomeRepositoryMock, 1, incomes);
 
             // Act
-            var result = await _fixture.IncomeService.GetAllAsync();
+            var result = await _fixture.IncomeService.GetByUserIdAsync(1);
 
             // Assert
             AssertHelpers.AssertIncomeCount(result, 5);
         }
 
         [Fact]
-        public async Task GetAllAsync_WithEmptyList_ShouldReturnEmptyList()
+        public async Task GetByUserIdAsync_WithEmptyList_ShouldReturnEmptyList()
         {
             // Arrange
-            MockHelpers.SetupIncomeGetAll(_fixture.IncomeRepositoryMock, new());
+            MockHelpers.SetupIncomeGetByUserId(_fixture.IncomeRepositoryMock, 1, new());
 
             // Act
-            var result = await _fixture.IncomeService.GetAllAsync();
+            var result = await _fixture.IncomeService.GetByUserIdAsync(1);
 
             // Assert
             Assert.Empty(result);

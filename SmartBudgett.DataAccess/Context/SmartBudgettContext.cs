@@ -23,5 +23,37 @@ namespace SmartBudgett.DataAccess.Context
 
             base.OnModelCreating(modelBuilder);
         }
+
+        public override int SaveChanges()
+        {
+            SetAuditFields();
+            return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(
+            CancellationToken cancellationToken = default)
+        {
+            SetAuditFields();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void SetAuditFields()
+        {
+            var now = DateTime.UtcNow;
+
+            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.CreatedDate = now;
+                    entry.Entity.UpdatedDate = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Property(entity => entity.CreatedDate).IsModified = false;
+                    entry.Entity.UpdatedDate = now;
+                }
+            }
+        }
     }
 }

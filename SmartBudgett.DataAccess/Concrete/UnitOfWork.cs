@@ -6,10 +6,10 @@ namespace SmartBudgett.DataAccess.Concrete
     public class UnitOfWork : IUnitOfWork
     {
         private readonly SmartBudgetContext _context;
-        private IUserRepository _userRepository;
-        private ICategoryRepository _categoryRepository;
-        private IIncomeRepository _incomeRepository;
-        private IExpenseRepository _expenseRepository;
+        private IUserRepository? _userRepository;
+        private ICategoryRepository? _categoryRepository;
+        private IIncomeRepository? _incomeRepository;
+        private IExpenseRepository? _expenseRepository;
 
         public UnitOfWork(SmartBudgetContext context)
         {
@@ -48,7 +48,7 @@ namespace SmartBudgett.DataAccess.Concrete
 
         public void Dispose()
         {
-            _context?.Dispose();
+            _context.Dispose();
         }
     }
 }

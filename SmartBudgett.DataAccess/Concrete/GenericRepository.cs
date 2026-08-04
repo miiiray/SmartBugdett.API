@@ -18,10 +18,10 @@ namespace SmartBudgett.DataAccess.Concrete
      
         public List<T> GetAll()
         {
-            return _dbSet.ToList();
+            return _dbSet.AsNoTracking().ToList();
         }
 
-        public T GetById(int id)
+        public T? GetById(int id)
         {
             return _dbSet.Find(id);
         }
@@ -47,10 +47,10 @@ namespace SmartBudgett.DataAccess.Concrete
         
         public async Task<List<T>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet.AsNoTracking().ToListAsync();
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }

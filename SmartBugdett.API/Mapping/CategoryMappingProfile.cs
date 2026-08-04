@@ -9,9 +9,8 @@ namespace SmartBudgett.API.Mapping
     {
         public CategoryMappingProfile()
         {
-            CreateMap<Category, CategoryResponseDto>().ReverseMap();
-            CreateMap<Category, CategoryUpdateDto>().ReverseMap();
-            CreateMap<Category, CategoryCreateDto>().ReverseMap();
+            CreateMap<Category, CategoryResponseDto>();
+            CreateMap<CategoryCreateDto, Category>();
         }
     }
 }

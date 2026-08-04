@@ -2,10 +2,10 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartBudgett.API.Common;
+using SmartBudgett.API.Extensions;
 using SmartBudgett.Business.Abstract;
 using SmartBudgett.DTO.Categories;
 using SmartBudgett.Entities;
-using System.Security.Claims;
 
 namespace SmartBudgett.API.Controllers
 {
@@ -26,35 +26,24 @@ namespace SmartBudgett.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdValue, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
-            var categories = await _categoryService.GetAllAsync();
+            var categories = await _categoryService.GetByUserIdAsync(userId);
 
-            var userCategories = categories
-                .Where(x => x.UserId == userId)
-                .ToList();
-
-            return Ok(_mapper.Map<List<CategoryResponseDto>>(userCategories));
+            return Ok(_mapper.Map<List<CategoryResponseDto>>(categories));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int:min(1)}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdValue, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var category = await _categoryService.GetByIdAsync(id);
 
-            if (category == null)
+            if (category == null || category.UserId != userId)
                 return NotFound();
-
-            if (category.UserId != userId)
-                return Forbid();
 
             return Ok(_mapper.Map<CategoryResponseDto>(category));
         }
@@ -62,37 +51,34 @@ namespace SmartBudgett.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CategoryCreateDto dto)
         {
-            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdValue, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var category = _mapper.Map<Category>(dto);
 
+            category.Name = dto.Name.Trim();
             category.UserId = userId;
+            category.CreatedDate = DateTime.UtcNow;
+            category.UpdatedDate = category.CreatedDate;
 
             await _categoryService.AddAsync(category);
 
             return Ok(_mapper.Map<CategoryResponseDto>(category));
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int:min(1)}")]
         public async Task<IActionResult> Update(int id, CategoryUpdateDto dto)
         {
-            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdValue, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var category = await _categoryService.GetByIdAsync(id);
 
-            if (category == null)
+            if (category == null || category.UserId != userId)
                 return NotFound();
 
-            if (category.UserId != userId)
-                return Forbid();
-
-            category.Name = dto.Name;
+            category.Name = dto.Name.Trim();
+            category.UpdatedDate = DateTime.UtcNow;
 
             await _categoryService.UpdateAsync(category);
 
@@ -100,21 +86,16 @@ namespace SmartBudgett.API.Controllers
         }
 
         
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int:min(1)}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdValue, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var category = await _categoryService.GetByIdAsync(id);
 
-            if (category == null)
+            if (category == null || category.UserId != userId)
                 return NotFound();
-
-            if (category.UserId != userId)
-                return Forbid();
 
             await _categoryService.DeleteAsync(category);
 

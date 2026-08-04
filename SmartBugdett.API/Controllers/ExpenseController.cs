@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartBudgett.API.Common;
+using SmartBudgett.API.Extensions;
 using SmartBudgett.Business.Abstract;
 using SmartBudgett.Business.Abstract.Services;
 using SmartBudgett.DTO.Expenses;
 using SmartBudgett.Entities;
-using System.Security.Claims;
 
 namespace SmartBudgett.API.Controllers
 {
@@ -32,39 +32,26 @@ namespace SmartBudgett.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var userIdValue =
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdValue, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
-            var expenses = await _expenseService.GetAllAsync();
-
-            var userExpenses = expenses
-                .Where(x => x.UserId == userId)
-                .ToList();
+            var expenses = await _expenseService.GetByUserIdAsync(userId);
 
             return Ok(
-                _mapper.Map<List<ExpenseResponseDto>>(userExpenses)
+                _mapper.Map<List<ExpenseResponseDto>>(expenses)
             );
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int:min(1)}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var userIdValue =
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdValue, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var expense = await _expenseService.GetByIdAsync(id);
 
-            if (expense == null)
+            if (expense == null || expense.UserId != userId)
                 return NotFound("Harcama bulunamadı.");
-
-            if (expense.UserId != userId)
-                return Forbid();
 
             return Ok(_mapper.Map<ExpenseResponseDto>(expense));
         }
@@ -72,60 +59,49 @@ namespace SmartBudgett.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(ExpenseCreateDto dto)
         {
-            var userIdValue =
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdValue, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var category =
                 await _categoryService.GetByIdAsync(dto.CategoryId);
 
-            if (category == null)
+            if (category == null || category.UserId != userId)
                 return BadRequest("Kategori bulunamadı.");
-
-            if (category.UserId != userId)
-                return Forbid();
 
             var expense = _mapper.Map<Expense>(dto);
 
+            expense.Description = dto.Description.Trim();
             expense.UserId = userId;
+            expense.CreatedDate = DateTime.UtcNow;
+            expense.UpdatedDate = expense.CreatedDate;
 
             await _expenseService.AddAsync(expense);
 
             return Ok(_mapper.Map<ExpenseResponseDto>(expense));
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int:min(1)}")]
         public async Task<IActionResult> Update(int id, ExpenseUpdateDto dto)
         {
-            var userIdValue =
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdValue, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var expense = await _expenseService.GetByIdAsync(id);
 
-            if (expense == null)
+            if (expense == null || expense.UserId != userId)
                 return NotFound("Harcama bulunamadı.");
-
-            if (expense.UserId != userId)
-                return Forbid();
 
             var category =
                 await _categoryService.GetByIdAsync(dto.CategoryId);
 
-            if (category == null)
+            if (category == null || category.UserId != userId)
                 return BadRequest("Kategori bulunamadı.");
 
-            if (category.UserId != userId)
-                return Forbid();
-
             expense.Amount = dto.Amount;
-            expense.Description = dto.Description;
+            expense.Description = dto.Description.Trim();
             expense.ExpenseDate = dto.ExpenseDate;
             expense.CategoryId = dto.CategoryId;
+            expense.UpdatedDate = DateTime.UtcNow;
 
             await _expenseService.UpdateAsync(expense);
 
@@ -137,22 +113,16 @@ namespace SmartBudgett.API.Controllers
                     "Gider başarıyla güncellendi"));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int:min(1)}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var userIdValue =
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdValue, out var userId))
+            if (!User.TryGetUserId(out var userId))
                 return Unauthorized();
 
             var expense = await _expenseService.GetByIdAsync(id);
 
-            if (expense == null)
+            if (expense == null || expense.UserId != userId)
                 return NotFound("Harcama bulunamadı.");
-
-            if (expense.UserId != userId)
-                return Forbid();
 
             await _expenseService.DeleteAsync(expense);
 

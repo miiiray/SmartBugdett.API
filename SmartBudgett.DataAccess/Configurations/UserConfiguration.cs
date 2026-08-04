@@ -22,7 +22,11 @@ namespace SmartBudgett.DataAccess.Configurations
                    .HasMaxLength(100)
                    .IsRequired();
 
+            builder.HasIndex(u => u.Email)
+                   .IsUnique();
+
             builder.Property(u => u.Password)
+                   .HasMaxLength(100)
                    .IsRequired();
         }
     }

@@ -1,28 +1,24 @@
-﻿using FluentValidation;
-using SmartBudgett.DTO.Auth;
+using FluentValidation;
+using SmartBudgett.DTO.Users;
 
 namespace SmartBudgett.DTO.ValidationRules
 {
-    public class UserRegisterDtoValidator : AbstractValidator<UserRegisterDto>
+    public class UserUpdateDtoValidator : AbstractValidator<UserUpdateDto>
     {
-        public UserRegisterDtoValidator()
+        public UserUpdateDtoValidator()
         {
-            RuleFor(u => u.FirstName)
+            RuleFor(user => user.FirstName)
                 .NotEmpty().WithMessage("Ad alanı boş geçilemez.")
                 .MaximumLength(50).WithMessage("Ad alanı en fazla 50 karakter olabilir.");
-            RuleFor(u => u.LastName)
+
+            RuleFor(user => user.LastName)
                 .NotEmpty().WithMessage("Soyad alanı boş geçilemez.")
                 .MaximumLength(50).WithMessage("Soyad alanı en fazla 50 karakter olabilir.");
 
-            RuleFor(u => u.Email)
+            RuleFor(user => user.Email)
                 .NotEmpty().WithMessage("E-posta adresi boş geçilemez.")
                 .EmailAddress().WithMessage("Lütfen geçerli bir e-posta adresi giriniz.")
                 .MaximumLength(100).WithMessage("E-posta en fazla 100 karakter olabilir.");
-
-            RuleFor(u => u.Password)
-                .NotEmpty().WithMessage("Şifre boş geçilemez.")
-                .MinimumLength(6).WithMessage("Şifre en az 6 karakter olmalıdır.")
-                .MaximumLength(72).WithMessage("Şifre en fazla 72 karakter olabilir.");
         }
     }
 }

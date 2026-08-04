@@ -9,9 +9,9 @@ namespace SmartBudgett.API.Mapping
     {
         public IncomeMappingProfile()
         {
-            CreateMap<Income, IncomeResponseDto>().ReverseMap();
-            CreateMap<Income, IncomeCreateDto>().ReverseMap();
-            CreateMap<Income, IncomeUpdateDto>().ReverseMap();
+            CreateMap<Income, IncomeResponseDto>();
+            CreateMap<IncomeCreateDto, Income>();
+            CreateMap<IncomeUpdateDto, Income>();
         }
     }
 }

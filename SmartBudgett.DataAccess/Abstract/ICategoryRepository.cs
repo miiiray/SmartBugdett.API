@@ -9,6 +9,6 @@ namespace SmartBudgett.DataAccess.Abstract
 {
     public interface ICategoryRepository : IGenericRepository<Category>
     {
-
+        Task<List<Category>> GetByUserIdAsync(int userId);
     }
 }
