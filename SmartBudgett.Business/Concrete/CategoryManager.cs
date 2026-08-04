@@ -20,12 +20,7 @@ namespace SmartBudgett.Business.Concrete
             _categoryRepository.Add(category);
         }
 
-        public List<Category> GetAll()
-        {
-            return _categoryRepository.GetAll();
-        }
-
-        public Category GetById(int id)
+        public Category? GetById(int id)
         {
             if (id <= 0)
                 throw new Exception("Invalid category ID.");
@@ -54,12 +49,15 @@ namespace SmartBudgett.Business.Concrete
             await _categoryRepository.AddAsync(category);
         }
 
-        public async Task<List<Category>> GetAllAsync()
+        public Task<List<Category>> GetByUserIdAsync(int userId)
         {
-            return await _categoryRepository.GetAllAsync();
+            if (userId <= 0)
+                throw new ArgumentException("User id must be greater than zero.");
+
+            return _categoryRepository.GetByUserIdAsync(userId);
         }
 
-        public async Task<Category> GetByIdAsync(int id)
+        public async Task<Category?> GetByIdAsync(int id)
         {
             if (id <= 0)
                 throw new Exception("Invalid category ID.");

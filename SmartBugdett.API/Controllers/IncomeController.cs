@@ -1,11 +1,11 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartBudgett.API.Common;
+using SmartBudgett.API.Extensions;
 using SmartBudgett.Business.Abstract;
 using SmartBudgett.DTO.Incomes;
 using SmartBudgett.Entities;
-using System.Security.Claims;
 
 namespace SmartBudgett.API.Controllers
 {
@@ -15,134 +15,125 @@ namespace SmartBudgett.API.Controllers
     public class IncomeController : ControllerBase
     {
         private readonly IIncomeService _incomeService;
+        private readonly ICategoryService _categoryService;
         private readonly IMapper _mapper;
 
-        public IncomeController(IIncomeService incomeService, IMapper mapper)
+        public IncomeController(
+            IIncomeService incomeService,
+            ICategoryService categoryService,
+            IMapper mapper)
         {
             _incomeService = incomeService;
+            _categoryService = categoryService;
             _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<List<IncomeResponseDto>>>> GetAll()
         {
-            try
-            {
-                var values = await _incomeService.GetAllAsync();
-                var response = _mapper.Map<List<IncomeResponseDto>>(values);
-                return Ok(ApiResponse<List<IncomeResponseDto>>.Ok(response, "Gelirler başarıyla alınldı"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<List<IncomeResponseDto>>.Error("Gelirler alınırken hata oluştu", ex.Message));
-            }
+            if (!User.TryGetUserId(out var userId))
+                return Unauthorized();
+
+            var incomes = await _incomeService.GetByUserIdAsync(userId);
+            var response = _mapper.Map<List<IncomeResponseDto>>(incomes);
+
+            return Ok(ApiResponse<List<IncomeResponseDto>>.Ok(
+                response,
+                "Gelirler başarıyla alındı"));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int:min(1)}")]
         public async Task<ActionResult<ApiResponse<IncomeResponseDto>>> GetById(int id)
         {
-            try
-            {
-                var value = await _incomeService.GetByIdAsync(id);
-                if (value == null)
-                {
-                    return NotFound(ApiResponse<IncomeResponseDto>.Error("Gelir bulunamadı", $"ID: {id} olan gelir bulunamadı"));
-                }
+            if (!User.TryGetUserId(out var userId))
+                return Unauthorized();
 
-                var response = _mapper.Map<IncomeResponseDto>(value);
-                return Ok(ApiResponse<IncomeResponseDto>.Ok(response, "Gelir başarıyla alınldı"));
-            }
-            catch (Exception ex)
+            var income = await _incomeService.GetByIdAsync(id);
+
+            if (income is null || income.UserId != userId)
             {
-                return BadRequest(ApiResponse<IncomeResponseDto>.Error("Gelir alınırken hata oluştu", ex.Message));
+                return NotFound(ApiResponse<IncomeResponseDto>.Error(
+                    "Gelir bulunamadı"));
             }
+
+            return Ok(ApiResponse<IncomeResponseDto>.Ok(
+                _mapper.Map<IncomeResponseDto>(income),
+                "Gelir başarıyla alındı"));
         }
 
         [HttpPost]
-        [HttpPost]
-        public async Task<ActionResult<ApiResponse<IncomeResponseDto>>> Add(
-    IncomeCreateDto incomeCreateDto)
+        public async Task<ActionResult<ApiResponse<IncomeResponseDto>>> Add(IncomeCreateDto dto)
         {
-            try
-            {
-                var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!User.TryGetUserId(out var userId))
+                return Unauthorized();
 
-                if (!int.TryParse(userIdValue, out var userId))
-                {
-                    return Unauthorized();
-                }
+            var category = await _categoryService.GetByIdAsync(dto.CategoryId);
 
-                var income = _mapper.Map<Income>(incomeCreateDto);
+            if (category is null || category.UserId != userId)
+                return NotFound(ApiResponse<IncomeResponseDto>.Error("Kategori bulunamadı"));
 
-                income.UserId = userId;
-                income.IncomeDate = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            var income = _mapper.Map<Income>(dto);
+            income.Description = dto.Description.Trim();
+            income.UserId = userId;
+            income.IncomeDate = now;
+            income.CreatedDate = now;
+            income.UpdatedDate = now;
 
-                await _incomeService.AddAsync(income);
+            await _incomeService.AddAsync(income);
 
-                var result = _mapper.Map<IncomeResponseDto>(income);
+            var result = _mapper.Map<IncomeResponseDto>(income);
 
-                return CreatedAtAction(
-                    nameof(GetById),
-                    new { id = income.Id },
-                    ApiResponse<IncomeResponseDto>.Ok(
-                        result,
-                        "Gelir başarıyla eklendi"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(
-                    ApiResponse<IncomeResponseDto>.Error(
-                        "Gelir eklenirken hata oluştu",
-                        ex.Message));
-            }
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = income.Id },
+                ApiResponse<IncomeResponseDto>.Ok(result, "Gelir başarıyla eklendi"));
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<IncomeResponseDto>>> Update(int id, IncomeUpdateDto incomeUpdateDto)
+        [HttpPut("{id:int:min(1)}")]
+        public async Task<ActionResult<ApiResponse<IncomeResponseDto>>> Update(
+            int id,
+            IncomeUpdateDto dto)
         {
-            try
-            {
-                if (id != incomeUpdateDto.Id)
-                {
-                    return BadRequest(ApiResponse<IncomeResponseDto>.Error("ID uyuşmuyor", "Route'daki ID ile DTO'daki ID uyuşmıyor"));
-                }
+            if (!User.TryGetUserId(out var userId))
+                return Unauthorized();
 
-                var existingIncome = await _incomeService.GetByIdAsync(id);
-                if (existingIncome == null)
-                {
-                    return NotFound(ApiResponse<IncomeResponseDto>.Error("Gelir bulunamadı", $"ID: {id} olan gelir bulunamadı"));
-                }
+            var income = await _incomeService.GetByIdAsync(id);
 
-                _mapper.Map(incomeUpdateDto, existingIncome);
-                await _incomeService.UpdateAsync(existingIncome);
-                var result = _mapper.Map<IncomeResponseDto>(existingIncome);
+            if (income is null || income.UserId != userId)
+                return NotFound(ApiResponse<IncomeResponseDto>.Error("Gelir bulunamadı"));
 
-                return Ok(ApiResponse<IncomeResponseDto>.Ok(result, "Gelir başarıyla güncellendi"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse<IncomeResponseDto>.Error("Gelir güncellenirken hata oluştu", ex.Message));
-            }
+            var category = await _categoryService.GetByIdAsync(dto.CategoryId);
+
+            if (category is null || category.UserId != userId)
+                return NotFound(ApiResponse<IncomeResponseDto>.Error("Kategori bulunamadı"));
+
+            income.Amount = dto.Amount;
+            income.Description = dto.Description.Trim();
+            income.IncomeDate = dto.IncomeDate;
+            income.CategoryId = dto.CategoryId;
+            income.UpdatedDate = DateTime.UtcNow;
+
+            await _incomeService.UpdateAsync(income);
+
+            return Ok(ApiResponse<IncomeResponseDto>.Ok(
+                _mapper.Map<IncomeResponseDto>(income),
+                "Gelir başarıyla güncellendi"));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int:min(1)}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
-            try
-            {
-                var income = await _incomeService.GetByIdAsync(id);
-                if (income == null)
-                {
-                    return NotFound(ApiResponse.Error("Gelir bulunamadı", $"ID: {id} olan gelir bulunamadı"));
-                }
+            if (!User.TryGetUserId(out var userId))
+                return Unauthorized();
 
-                await _incomeService.DeleteAsync(income);
-                return Ok(ApiResponse.Ok("Gelir başarıyla silindi"));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponse.Error("Gelir silinirken hata oluştu", ex.Message));
-            }
+            var income = await _incomeService.GetByIdAsync(id);
+
+            if (income is null || income.UserId != userId)
+                return NotFound(ApiResponse.Error("Gelir bulunamadı"));
+
+            await _incomeService.DeleteAsync(income);
+            return Ok(ApiResponse.Ok("Gelir başarıyla silindi"));
         }
     }
 }

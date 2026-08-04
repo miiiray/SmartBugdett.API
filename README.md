@@ -95,12 +95,57 @@ The project enables users to securely manage:
 
 ---
 
+# 🚀 Local Setup
+
+1. Configure local secrets from the repository root. Never commit these values:
+
+```powershell
+$jwtKey = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(64))
+dotnet user-secrets set "Jwt:SecurityKey" "$jwtKey" --project SmartBugdett.API/SmartBudgett.API.csproj
+dotnet user-secrets set "AiSettings:OpenAIApiKey" "YOUR_OPENAI_API_KEY" --project SmartBugdett.API/SmartBudgett.API.csproj
+```
+
+2. Apply the database migrations:
+
+```powershell
+Push-Location SmartBugdett.API
+dotnet tool restore
+dotnet ef database update --project ../SmartBudgett.DataAccess --startup-project .
+Pop-Location
+```
+
+The data-integrity migration does not delete invalid legacy data. If it stops,
+read the SQL error, correct the duplicate or orphaned record, and run the update again.
+
+3. Start the API:
+
+```powershell
+dotnet run --project SmartBugdett.API
+```
+
+Swagger is available in the Development environment at `/swagger`.
+
+## Protected user endpoints
+
+The user endpoints always operate on the identity in the JWT. A client cannot select another user ID.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/User/me` | Get the signed-in user |
+| PUT | `/api/User/me` | Update the signed-in user |
+| DELETE | `/api/User/me` | Delete the signed-in user |
+| POST | `/api/Ai/budget-analysis` | Generate the signed-in user's budget analysis |
+
+---
+
 # 🔐 Security
 
 - 🔑 JWT Bearer Authentication
 - 👤 User-based Authorization
 - 🔒 Password Hashing
 - 🛡️ Ownership Validation
+- 🔐 Secrets stored outside source control
+- 🚦 Rate limiting for AI analysis
 
 ---
 

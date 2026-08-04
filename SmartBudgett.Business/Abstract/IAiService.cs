@@ -2,7 +2,9 @@
 {
     public interface IAiService
     {
-        Task<string> AnalyzeBudgetAsync(int userId);
+        Task<string> AnalyzeBudgetAsync(
+            int userId,
+            CancellationToken cancellationToken = default);
        
     }
 }

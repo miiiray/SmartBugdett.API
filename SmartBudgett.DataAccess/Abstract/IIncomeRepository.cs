@@ -9,5 +9,6 @@ namespace SmartBudgett.DataAccess.Abstract
 {
     public interface IIncomeRepository : IGenericRepository<Income>
     {
+        Task<List<Income>> GetByUserIdAsync(int userId);
     }
 }

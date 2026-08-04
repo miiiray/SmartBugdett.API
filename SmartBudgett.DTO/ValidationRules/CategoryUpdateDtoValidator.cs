@@ -1,18 +1,16 @@
-﻿using FluentValidation;
-using SmartBudgett.DTO;
+using FluentValidation;
 using SmartBudgett.DTO.Categories;
+
 namespace SmartBudgett.DTO.ValidationRules
 {
-    public class CategoryCreateDtoValidator : AbstractValidator<CategoryCreateDto>
+    public class CategoryUpdateDtoValidator : AbstractValidator<CategoryUpdateDto>
     {
-        
-        public CategoryCreateDtoValidator()
+        public CategoryUpdateDtoValidator()
         {
-            RuleFor(x => x.Name)
+            RuleFor(category => category.Name)
                 .NotEmpty().WithMessage("Kategori adı boş geçilemez.")
                 .MinimumLength(2).WithMessage("Kategori adı en az 2 karakter olmalıdır.")
                 .MaximumLength(100).WithMessage("Kategori adı en fazla 100 karakter olabilir.");
         }
-        
     }
 }

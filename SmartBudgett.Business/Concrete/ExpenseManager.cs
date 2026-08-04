@@ -21,12 +21,7 @@ namespace SmartBudgett.Business.Concrete
             _expenseRepository.Add(expense);
         }
 
-        public List<Expense> GetAll()
-        {
-            return _expenseRepository.GetAll();
-        }
-
-        public Expense GetById(int id)
+        public Expense? GetById(int id)
         {
             if (id <= 0)
                 throw new ArgumentException("Expense id must be greater than zero.");
@@ -55,12 +50,15 @@ namespace SmartBudgett.Business.Concrete
             await _expenseRepository.AddAsync(expense);
         }
 
-        public async Task<List<Expense>> GetAllAsync()
+        public Task<List<Expense>> GetByUserIdAsync(int userId)
         {
-            return await _expenseRepository.GetAllAsync();
+            if (userId <= 0)
+                throw new ArgumentException("User id must be greater than zero.");
+
+            return _expenseRepository.GetByUserIdAsync(userId);
         }
 
-        public async Task<Expense> GetByIdAsync(int id)
+        public async Task<Expense?> GetByIdAsync(int id)
         {
             if (id <= 0)
                 throw new ArgumentException("Expense id must be greater than zero.");

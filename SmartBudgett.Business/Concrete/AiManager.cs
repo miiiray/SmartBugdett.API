@@ -26,20 +26,13 @@ namespace SmartBudgett.Business.Concrete.Managers
             _expenseService = expenseService;
         }
 
-        public async Task<string> AnalyzeBudgetAsync(int userId)
+        public async Task<string> AnalyzeBudgetAsync(
+            int userId,
+            CancellationToken cancellationToken = default)
         {
             // 1. Gelir ve gider verilerini servislerden alıyoruz.
-            var incomes = await _incomeService.GetAllAsync();
-            var expenses = await _expenseService.GetAllAsync();
-
-            // Sadece giriş yapan kullanıcıya ait kayıtları seçiyoruz.
-            incomes = incomes
-                .Where(x => x.UserId == userId)
-                .ToList();
-
-            expenses = expenses
-                .Where(x => x.UserId == userId)
-                .ToList();
+            var incomes = await _incomeService.GetByUserIdAsync(userId);
+            var expenses = await _expenseService.GetByUserIdAsync(userId);
 
             if (!incomes.Any() && !expenses.Any())
             {
@@ -50,12 +43,6 @@ namespace SmartBudgett.Business.Concrete.Managers
             decimal totalIncome = incomes.Sum(x => x.Amount);
             decimal totalExpense = expenses.Sum(x => x.Amount);
             decimal remaining = totalIncome - totalExpense;
-
-            // 4. Kullanıcının hiç verisi yoksa API isteği göndermiyoruz.
-            if (!incomes.Any() && !expenses.Any())
-            {
-                return "Bütçe analizi yapılabilmesi için önce gelir veya gider eklemelisiniz.";
-            }
 
             // 5. OpenAI ayarlarını alıyoruz.
             var apiKey = _configuration["AiSettings:OpenAIApiKey"];
@@ -137,7 +124,8 @@ namespace SmartBudgett.Business.Concrete.Managers
             {
                 model = model,
                 input = prompt,
-                max_output_tokens = 700
+                max_output_tokens = 700,
+                store = false
             };
 
             var json = JsonSerializer.Serialize(requestBody);
@@ -155,10 +143,12 @@ namespace SmartBudgett.Business.Concrete.Managers
                 "application/json");
 
             // 8. İsteği OpenAI API'ye gönderiyoruz.
-            using var response = await _httpClient.SendAsync(request);
+            using var response = await _httpClient.SendAsync(
+                request,
+                cancellationToken);
 
             var responseContent =
-                await response.Content.ReadAsStringAsync();
+                await response.Content.ReadAsStringAsync(cancellationToken);
 
             // 9. Başarısız cevapları anlaşılır bir hata olarak döndürüyoruz.
             if (!response.IsSuccessStatusCode)

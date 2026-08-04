@@ -8,7 +8,7 @@ namespace SmartBudgett.DTO.Categories
 {
     public class CategoryCreateDto
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
        
     }
 }
