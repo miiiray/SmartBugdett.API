@@ -9,6 +9,7 @@
 ![C#](https://img.shields.io/badge/C%23-Backend-239120?style=for-the-badge)
 ![SQL Server](https://img.shields.io/badge/SQL%20Server-Database-red?style=for-the-badge)
 ![OpenAI](https://img.shields.io/badge/OpenAI-AI-green?style=for-the-badge)
+[![CI](https://github.com/miiiray/SmartBugdett.API/actions/workflows/ci.yml/badge.svg)](https://github.com/miiiray/SmartBugdett.API/actions/workflows/ci.yml)
 
 </div>
 
